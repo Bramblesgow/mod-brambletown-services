@@ -1,0 +1,36 @@
+name: NPC Services portable source checks
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  source-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout reviewed module
+        uses: actions/checkout@v4
+
+      - name: Run portable Python source checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for test in \
+            tests/test_draft_structure.py \
+            tests/test_enchanter_menu_polish.py \
+            tests/test_feast_refresh_every_drop.py \
+            tests/test_feast_state_machine_regression.py \
+            tests/test_review_invariants.py \
+            tests/test_scribe_catalog.py \
+            tests/test_services_command_rejections.py; do
+            python3 "$test"
+          done
+
+      - name: Explain verification limits
+        run: |
+          echo "These are static source-contract checks only."
+          echo "They do not compile C++, apply the native core patch, alter SQL, or test gameplay."
