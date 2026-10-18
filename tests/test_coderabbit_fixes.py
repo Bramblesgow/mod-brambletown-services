@@ -11,6 +11,11 @@ enchanter_sql=read('sql/GM_STAGING_enchanter_only.sql')
 goods_sql=read('sql/GM_STAGING_general_goods_vendor.sql')
 header=read('src/brambletown_npc_services.h')
 workflow=read('.github/workflows/static-checks.yml')
+native_patch=read('patches/brambletown-npc-access-and-scribe-price-cap.patch')
+assert '+    if (brambletownEntry >= 910101u && brambletownEntry <= 910106u)' in native_patch
+assert 'brambletownEntry >= 910102u && brambletownEntry <= 910106u' not in native_patch
+assert 'BrambleServices.Access.GMOnly' in native_patch
+assert 'BrambleServices.Provider.' in native_patch
 assert 'SendShowMailBox(creature->GetGUID())' in service
 assert 'SendShowMailBox(player->GetGUID())' not in service
 assert '67108865' in steward_sql

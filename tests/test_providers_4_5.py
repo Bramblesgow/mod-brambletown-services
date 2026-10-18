@@ -11,6 +11,7 @@ config=(root/'conf/brambletown_services.conf.dist').read_text()
 coord=(root/'src/brambletown_services.cpp').read_text()
 guard=(root/'src/brambletown_auction_guard.cpp').read_text()
 player=(core/'src/server/game/Entities/Player/Player.cpp').read_text()
+native_patch=(root/'patches/brambletown-npc-access-and-scribe-price-cap.patch').read_text()
 loader=(root/'src/MP_loader.cpp').read_text()
 
 # Auctioneer: two verified native faction NPCs, no global auction policy change.
@@ -50,7 +51,11 @@ assert 'BrambleServices.ProviderCount = 5' in config
 assert 'index == 4 && (provider.allianceEntry != 910104u || provider.hordeEntry != 910105u)' in coord
 assert 'index == 5 && provider.entry != 910106u' in coord
 assert 'GetNPCIfCanInteractWith' in player
-assert 'brambletownEntry >= 910102u && brambletownEntry <= 910106u' in player
+# The staged patch must guard all native interactions, including Steward mailbox.
+assert 'brambletownEntry >= 910101u && brambletownEntry <= 910106u' in native_patch
+# The separately deployed core may still carry the older guard until approved deployment.
+assert any(f'brambletownEntry >= {start}u && brambletownEntry <= 910106u' in player
+           for start in (910101, 910102))
 for control in ('BrambleServices.Enable','BrambleServices.ProviderCount','BrambleServices.Access.GMOnly','BrambleServices.Interaction.AllowInCombat','BrambleServices.AllowInInstances'):
     assert control in player
 assert 'GetSession()->IsHeadless()' in player

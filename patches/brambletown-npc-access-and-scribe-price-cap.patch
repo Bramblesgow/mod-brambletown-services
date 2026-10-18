@@ -6,12 +6,12 @@ index 138e7eab4..136adda82 100644
      if (!creature)
          return nullptr;
  
-+    // Brambletown temporary NPC providers (2-5): enforce access at the
++    // Brambletown NPC providers (1-5): enforce access at the
 +    // common native interaction gate, not only at the gossip/auction window.
-+    // This also protects ordinary vendor purchases, sell/buyback and repairs.
++    // This also protects Steward mailbox use and ordinary vendor purchases, sell/buyback and repairs.
 +    // Never change interaction behavior for any existing world NPC.
 +    uint32 const brambletownEntry = creature->GetEntry();
-+    if (brambletownEntry >= 910102u && brambletownEntry <= 910106u)
++    if (brambletownEntry >= 910101u && brambletownEntry <= 910106u)
 +    {
 +        uint32 const provider = brambletownEntry <= 910103u ? brambletownEntry - 910100u
 +            : (brambletownEntry <= 910105u ? 4u : 5u);

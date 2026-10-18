@@ -15,7 +15,8 @@ assert all(':40:40:-18' not in line for line in lines)
 assert lines[0].count('Spell_Holy_SummonChampion')==1
 assert len({int(re.search(r'GOSSIP_SENDER_MAIN, (\d+)\);',line).group(1)) for line in lines})==13
 dbc_path=os.environ.get('SPELL_ICON_DBC')
-if dbc_path and Path(dbc_path).is_file():
+if dbc_path:
+    assert Path(dbc_path).is_file(), f"SpellIcon DBC not found: {dbc_path}"
     b=Path(dbc_path).read_bytes()
     magic,count,cols,sz,_=struct.unpack_from('<4s4I',b)
     assert magic==b'WDBC' and cols==2

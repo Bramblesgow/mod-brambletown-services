@@ -16,7 +16,7 @@ assert 'creature->GetEntry() == 910103 && pProto->Class == ITEM_CLASS_GLYPH' not
 assert 'vendor->GetEntry() == 910103 && itemTemplate->Class == ITEM_CLASS_GLYPH' not in (live/p2).read_text()
 patch=(r/'patches/brambletown-npc-access-and-scribe-price-cap.patch').read_text()
 assert 'diff --git a/'+p1 in patch and 'diff --git a/'+p2 in patch
-assert 'Brambletown Scribe' in patch and 'Brambletown temporary NPC providers' in patch
+assert 'Brambletown Scribe' in patch and 'Brambletown NPC providers (1-5)' in patch
 sql=(r/'sql/GM_STAGING_scribe_class_glyph_vendors.sql').read_text()
 assert 'UPDATE item_template' not in sql and 'DELETE FROM item_template' not in sql
 

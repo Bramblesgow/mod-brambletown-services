@@ -111,8 +111,10 @@ applies the normal eating aura (57398). Keeping this behavior retains the real
 | 459–759 | Each category offers only its reviewed actions. Leveling head/shoulder/leg and hunter ranged scopes preserved. 2H/shield/offhand invalid-item branches have one consistent outcome |
 | 760–862 | Equipment owner/worn-slot/type validation, specialization and DBC restrictions, permanent bonus reapplication, item-name flavor text and visual confirmation |
 
-**Compatibility:** The original database script name `npc_enchantment` is
-unchanged although the C++ class is now `BrambletownEnchanter`. Ring enchanting
+**Compatibility:** `npc_enchantment` was the historical script name. As of
+the October 18 CodeRabbit fixes, Brambletown Enchanter template `910102`
+registers as `brambletown_enchanter`; the scoped staging SQL migrates existing
+Brambletown records without changing unrelated Enchanters. Ring enchanting
 still applies to each equipped ring separately. The original cosmetic messages
 are preserved, including the corrected `{}` equipment-name substitution.
 
