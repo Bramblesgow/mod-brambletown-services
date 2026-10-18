@@ -113,9 +113,13 @@ python3 tests/check_cpp_syntax.py
 cmake --build /root/brambletown-upgrade-work/build-production --target worldserver -j 2
 ```
 
-When optional external validation data is available, set PLAYERBOTS_SRC to
-the installed Playerbots src directory and SPELL_ICON_DBC to a readable
-SpellIcon.dbc file. Missing optional data skips only its external checks.
+Optional installed-source checks use PLAYERBOTS_SRC (Playerbots src),
+SPELL_ICON_DBC (SpellIcon.dbc), SPELL_ENCHANT_DBC
+(SpellItemEnchantment.dbc), BRAMBLETOWN_CORE_ROOT (staged/core source root),
+and AZEROTHCORE_LIVE_ROOT (installed live AzerothCore root with DBC files).
+Without these variables, module-local regression checks run and external
+integration checks are clearly skipped. Explicitly configured invalid paths
+fail validation instead of silently passing.
 The new portable checks also assert mailbox registration, script-name
 migration, vendor inventory capacity protection and Engineering visibility.
 

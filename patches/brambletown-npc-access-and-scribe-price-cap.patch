@@ -43,10 +43,10 @@ index 138e7eab4..136adda82 100644
  
 +        // Brambletown Scribe (910103) only: charge no more than 1 gold per
 +        // glyph, matching SMSG_LIST_INVENTORY. All other vendors are unchanged.
++        // Compute the cap in 64 bits to avoid narrowing before comparison.
 +        // Native validation, quantity, inventory and purchase handling remain.
-+        if (creature->GetEntry() == 910103 && pProto->Class == ITEM_CLASS_GLYPH &&
-+            price > 10000u * count)
-+            price = 10000u * count;
++        if (creature->GetEntry() == 910103 && pProto->Class == ITEM_CLASS_GLYPH)
++            price = std::min<uint64>(price, uint64(10000u) * count);
 +
          if (!HasEnoughMoney(price))
          {
