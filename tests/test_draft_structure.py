@@ -14,11 +14,15 @@ assert len(settings) == len(re.findall(r"^BrambleServices\.[A-Za-z0-9_.]+\s*=", 
 assert "BrambleServices.DurationSeconds" in settings
 assert "BrambleServices.CooldownSeconds" not in settings
 assert "BrambleServices.Access.GMOnly" in settings
-assert "BrambleServices.Access.GMOnly = 1" in config
+def active_value(key):
+    values = re.findall(rf"^{re.escape(key)}\s*=\s*([^\s#;]+)", config, re.M)
+    assert len(values) == 1, (key, values)
+    return values[0]
+assert active_value("BrambleServices.Access.GMOnly") == "1"
 assert 'session->GetSecurity() < SEC_GAMEMASTER' in coordinator
 assert 'player->GetSession()->GetSecurity() < SEC_GAMEMASTER' in services
 assert 'Services are currently restricted to Game Masters.' in coordinator
-assert "BrambleServices.Provider.2.Enable = 0" in config
+assert active_value("BrambleServices.Provider.2.Enable") == "0"
 assert '"DBCStores.h"' in coordinator
 assert "sCreatureDisplayInfoStore.LookupEntry(provider.displayId)" in coordinator
 assert "creature->SetDisplayId(provider.displayId)" in coordinator

@@ -28,4 +28,4 @@ assert 'pending.receivedWellFed = true;' in update
 assert 'bot->CastSpell(bot, EatingAura, true)' in update
 assert 'No eligible playerbots nearby.' in s
 assert 'BrambleServices.Service.FishFeast.AutoBots' in s
-print('PASS: completed click/eating states cannot fall through to duplicate bot interactions; buffed bots skipped with helpful feedback')
+print('PASS: completed click/eating states cannot fall through to duplicate bot interactions; previously-buffed bots still eligible to refresh')

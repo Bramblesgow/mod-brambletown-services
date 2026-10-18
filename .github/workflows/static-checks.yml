@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout reviewed module
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Run portable Python source checks
         shell: bash
@@ -21,6 +21,7 @@ jobs:
           set -euo pipefail
           for test in \
             tests/test_draft_structure.py \
+            tests/test_coderabbit_fixes.py \
             tests/test_enchanter_menu_polish.py \
             tests/test_feast_refresh_every_drop.py \
             tests/test_feast_state_machine_regression.py \

@@ -203,7 +203,8 @@ namespace
         }
         // Brambletown auctioneer entries are fixed because the core native
         // interaction guard protects exactly these reviewed template IDs.
-        if ((index == 2 && provider.entry != 910102u) ||
+        if ((index == 1 && provider.entry != 910101u) ||
+            (index == 2 && provider.entry != 910102u) ||
             (index == 3 && provider.entry != 910103u) ||
             (index == 4 && (provider.allianceEntry != 910104u || provider.hordeEntry != 910105u)) ||
             (index == 5 && provider.entry != 910106u))

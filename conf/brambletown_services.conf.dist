@@ -39,7 +39,7 @@ BrambleServices.ProviderCount = 5
 # ====================================================================
 # Enable the Steward (required to access additional providers).
 BrambleServices.Provider.1.Enable = 1
-# NPC creature_template ID for the Steward.
+# Steward NPC template ID. Fixed by module gossip/access checks; do not change.
 BrambleServices.Provider.1.Entry = 910101
 # Override Steward appearance by client display ID; 0 uses the NPC template model.
 BrambleServices.Provider.1.DisplayId = 31833

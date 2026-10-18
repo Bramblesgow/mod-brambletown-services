@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 **  Written by MtgCore
 **  Rewritten by Poszer & Talamortis https://github.com/poszer/ & https://github.com/talamortis/
@@ -19,7 +21,4 @@ public:
     bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override;
 };
 
-void AddBrambletownNpcServices()
-{
-    new BrambletownNpcServices();
-}
+void AddBrambletownNpcServices();

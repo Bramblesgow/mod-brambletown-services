@@ -107,10 +107,17 @@ In the isolated development worktree, use:
 
 ```bash
 cd /root/brambletown-services-work/mod-brambletown-services
+set -e
 for test in tests/test_*.py; do python3 "$test"; done
 python3 tests/check_cpp_syntax.py
 cmake --build /root/brambletown-upgrade-work/build-production --target worldserver -j 2
 ```
+
+When optional external validation data is available, set PLAYERBOTS_SRC to
+the installed Playerbots src directory and SPELL_ICON_DBC to a readable
+SpellIcon.dbc file. Missing optional data skips only its external checks.
+The new portable checks also assert mailbox registration, script-name
+migration, vendor inventory capacity protection and Engineering visibility.
 
 The **151-entry golden fixture** at `tests/enchant_action_baseline.json` is a
 regression baseline for enchant gossip actions, DBC IDs and equipment slots.

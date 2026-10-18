@@ -9,6 +9,7 @@ reviews:
     drafts: false
     base_branches:
       - "main"
+      - "review/complete-module-baseline-20261018"
   path_instructions:
     - path: "src/**/*.{cpp,h,hpp}"
       instructions: |

@@ -715,7 +715,7 @@ bool BrambletownNpcServices::OnGossipSelect(Player* player, Creature* creature, 
 
         case 9: // Mailbox
             CloseGossipMenuFor(player);
-            player->GetSession()->SendShowMailBox(player->GetGUID());
+            player->GetSession()->SendShowMailBox(creature->GetGUID());
             break;
 
         case 10: // Learn Dual Talent Specialization
@@ -736,4 +736,9 @@ bool BrambletownNpcServices::OnGossipSelect(Player* player, Creature* creature, 
 
     }
     return true;
+}
+
+void AddBrambletownNpcServices()
+{
+    new BrambletownNpcServices();
 }
