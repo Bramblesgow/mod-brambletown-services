@@ -1,0 +1,70 @@
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index 138e7eab4..136adda82 100644
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -2126,6 +2126,34 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid const& guid, uint32 npcflag
+     if (!creature)
+         return nullptr;
+ 
++    // Brambletown temporary NPC providers (2-5): enforce access at the
++    // common native interaction gate, not only at the gossip/auction window.
++    // This also protects ordinary vendor purchases, sell/buyback and repairs.
++    // Never change interaction behavior for any existing world NPC.
++    uint32 const brambletownEntry = creature->GetEntry();
++    if (brambletownEntry >= 910102u && brambletownEntry <= 910106u)
++    {
++        uint32 const provider = brambletownEntry <= 910103u ? brambletownEntry - 910100u
++            : (brambletownEntry <= 910105u ? 4u : 5u);
++        if (!GetSession() || GetSession()->IsHeadless() ||
++            !sConfigMgr->GetOption<bool>("BrambleServices.Enable", false) ||
++            sConfigMgr->GetOption<uint32>("BrambleServices.ProviderCount", 5u) < provider ||
++            !sConfigMgr->GetOption<bool>(
++                "BrambleServices.Provider." + std::to_string(provider) + ".Enable", false) ||
++            (sConfigMgr->GetOption<bool>("BrambleServices.Access.GMOnly", true) &&
++             GetSession()->GetSecurity() < SEC_GAMEMASTER) ||
++            InArena() || InBattleground() ||
++            (!sConfigMgr->GetOption<bool>("BrambleServices.Interaction.AllowInCombat", false) && IsInCombat()) ||
++            (!sConfigMgr->GetOption<bool>("BrambleServices.AllowInInstances", false) &&
++             GetMap() && GetMap()->Instanceable()))
++            return nullptr;
++
++        // Providers 4A and 4H may only be used by their own faction.
++        if ((brambletownEntry == 910104u && GetTeamId() != TEAM_ALLIANCE) ||
++            (brambletownEntry == 910105u && GetTeamId() != TEAM_HORDE))
++            return nullptr;
++    }
++
+     // Deathstate checks
+     if (!IsAlive() && !(creature->GetCreatureTemplate()->type_flags & CREATURE_TYPE_FLAG_VISIBLE_TO_GHOSTS))
+         return nullptr;
+@@ -11040,6 +11068,13 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
+         // reputation discount
+         price = uint32(std::floor(price * GetReputationPriceDiscount(creature)));
+ 
++        // Brambletown Scribe (910103) only: charge no more than 1 gold per
++        // glyph, matching SMSG_LIST_INVENTORY. All other vendors are unchanged.
++        // Native validation, quantity, inventory and purchase handling remain.
++        if (creature->GetEntry() == 910103 && pProto->Class == ITEM_CLASS_GLYPH &&
++            price > 10000u * count)
++            price = 10000u * count;
++
+         if (!HasEnoughMoney(price))
+         {
+             SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, creature, item, 0);
+diff --git a/src/server/game/Handlers/ItemHandler.cpp b/src/server/game/Handlers/ItemHandler.cpp
+index 93430dbe9..9220d1e84 100644
+--- a/src/server/game/Handlers/ItemHandler.cpp
++++ b/src/server/game/Handlers/ItemHandler.cpp
+@@ -936,6 +936,12 @@ void WorldSession::SendListInventory(ObjectGuid vendorGuid, uint32 vendorEntry)
+                 // reputation discount
+                 int32 price = item->IsGoldRequired(itemTemplate) ? uint32(std::floor(itemTemplate->BuyPrice * discountMod)) : 0;
+ 
++                // Brambletown Scribe (910103) only: preserve ordinary prices below
++                // 1 gold and cap each glyph at 10000 copper in the vendor UI.
++                // Match the purchase-side cap in Player::BuyItemFromVendorSlot.
++                if (vendor->GetEntry() == 910103 && itemTemplate->Class == ITEM_CLASS_GLYPH && price > 10000)
++                    price = 10000;
++
+                 data << uint32(slot + 1);       // client expects counting to start at 1
+                 data << uint32(item->item);
+                 data << uint32(itemTemplate->DisplayInfoID);
