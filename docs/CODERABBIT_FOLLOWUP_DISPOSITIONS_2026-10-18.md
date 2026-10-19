@@ -104,3 +104,13 @@ disposable database; full target-core/Playerbots linked build; native packet,
 mailbox, vendor and Fish Feast in-game regression; CodeRabbit review of this
 follow-up PR. These are merge/deployment blockers as applicable. No live SQL,
 production builds, worldserver restart, deployment or merge was performed.
+
+## Post-review follow-up on PR #4
+
+The completed manual CodeRabbit review of PR #4 identified one further
+maintainability finding: the README syntax-check test verified only the
+word "syntax-only", allowing the complete command to be deleted unnoticed.
+The integrated PR #5 strengthens the test to require the documented
+`AZEROTHCORE_COMPILE_COMMANDS=/path/to/compile_commands.json python3 tests/check_cpp_syntax.py`
+invocation. The README already contains this command. The original PR #4
+remains unmerged; this finding is addressed in the PR #5 integration branch.

@@ -94,6 +94,7 @@ assert ".reload config" in maintainer
 assert "maximum 5" in maintainer
 assert "UPSTREAM_ENCHANTER_LICENSE.md" in maintainer
 assert "syntax-only" in maintainer
+assert "AZEROTHCORE_COMPILE_COMMANDS=/path/to/compile_commands.json python3 tests/check_cpp_syntax.py" in maintainer
 assert "temporary objects" in maintainer
 
 print("PASS: static configuration/command/lifecycle invariants")
