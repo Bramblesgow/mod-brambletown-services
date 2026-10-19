@@ -24,8 +24,16 @@ for script, name in checks:
             environment.pop(name)
         else:
             environment[name] = setting
-        result = subprocess.run([sys.executable, str(root / "tests" / script)],
-                                cwd=root, env=environment, capture_output=True, text=True)
+        try:
+            result = subprocess.run(
+                [sys.executable, str(root / "tests" / script)],
+                cwd=root, env=environment, capture_output=True, text=True,
+                check=False, timeout=15,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise AssertionError(
+                f"{script} timed out validating {name}={setting!r} (15-second limit)"
+            ) from exc
         assert result.returncode != 0, f"{script} unexpectedly accepts {name}={setting!r}"
         assert f"Set {name} " in result.stderr + result.stdout, (
             f"{script} did not reject {name}={setting!r}: {result.stderr}{result.stdout}"
