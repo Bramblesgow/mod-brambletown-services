@@ -64,7 +64,14 @@ required_checks = (
 )
 for check in required_checks:
     assert check in gate_body, f'Native NPC guard is missing {check}'
-assert gate_body.count('return nullptr;') == 2
+assert gate_body.count('return nullptr;') == 3
+assert re.search(
+    r'if\s*\(\s*brambletownEntry\s*==\s*910101u\s*&&\s*'
+    r'\(npcflagmask\s*&\s*UNIT_NPC_FLAG_MAILBOX\)\s*&&\s*'
+    r'!sConfigMgr->GetOption<bool>\("BrambleServices.Service.Mailbox",\s*true\)\s*\)'
+    r'\s*return nullptr\s*;',
+    gate_body,
+), 'Steward mailbox toggle is not enforced by native access'
 
 # The ONLY added code changing the gold price in each source hunk must be
 # gated on both the custom Scribe entry and the glyph item class. The 64-bit

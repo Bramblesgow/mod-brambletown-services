@@ -83,14 +83,62 @@ if player is not None:
     # The staged core may retain the previous native guard until deployment.
     assert any(f'brambletownEntry >= {start}u && brambletownEntry <= 910106u' in player
                for start in (910101, 910102))
+def braced_body(source, marker):
+    """Extract one C++ braced block after a unique source anchor."""
+    assert source.count(marker) == 1, f"Expected one C++ anchor: {marker}"
+    remainder = source.split(marker, 1)[1]
+    opening = remainder.find('{')
+    assert opening >= 0, f"Missing C++ block after {marker}"
+    depth = 0
+    for position in range(opening, len(remainder)):
+        if remainder[position] == '{':
+            depth += 1
+        elif remainder[position] == '}':
+            depth -= 1
+            if depth == 0:
+                return remainder[opening + 1:position]
+    raise AssertionError(f"Unbalanced C++ block after {marker}")
+
+
 if strict_guard:
     checked_root = live or core
     checked_path = checked_root/'src/server/game/Entities/Player/Player.cpp'
     assert checked_path.is_file(), f'Strict guard source missing: {checked_path}'
-    assert 'brambletownEntry >= 910101u && brambletownEntry <= 910106u' in checked_path.read_text(), (
-        f'Steward entry 910101 is not protected in {checked_path}'
+    native_source = checked_path.read_text()
+    interaction = braced_body(
+        native_source, 'Creature* Player::GetNPCIfCanInteractWith(ObjectGuid const& guid, uint32 npcflagmask)'
     )
-    print(f'PASS: strict native Steward guard present in {checked_root}')
+    guard = braced_body(
+        interaction, 'if (brambletownEntry >= 910101u && brambletownEntry <= 910106u)'
+    )
+    assert 'brambletownEntry = creature->GetEntry();' in interaction
+    assert 'brambletownEntry <= 910103u ? brambletownEntry - 910100u' in guard
+    assert 'brambletownEntry <= 910105u ? 4u : 5u' in guard
+    required_denials = (
+        'GetSession()->IsHeadless()',
+        '!sConfigMgr->GetOption<bool>("BrambleServices.Enable", false)',
+        'BrambleServices.ProviderCount',
+        'BrambleServices.Provider.',
+        'BrambleServices.Access.GMOnly',
+        'GetSession()->GetSecurity() < SEC_GAMEMASTER',
+        'BrambleServices.Interaction.AllowInCombat',
+        'BrambleServices.AllowInInstances',
+        'InArena()', 'InBattleground()',
+    )
+    first_deny = guard.split('return nullptr;', 1)[0]
+    for check in required_denials:
+        assert check in first_deny, f'Native Steward guard missing denial: {check}'
+    # A raw mailbox opcode must not bypass the separate Mailbox service toggle.
+    mailbox_deny = (
+        r'if\s*\(\s*brambletownEntry\s*==\s*910101u\s*&&\s*'
+        r'\(npcflagmask\s*&\s*UNIT_NPC_FLAG_MAILBOX\)\s*&&\s*'
+        r'!sConfigMgr->GetOption<bool>\("BrambleServices.Service.Mailbox",\s*true\)\s*\)'
+        r'\s*return nullptr\s*;'
+    )
+    assert re.search(mailbox_deny, guard), 'Disabled Steward mailbox can be used via native packets'
+    assert 'brambletownEntry == 910104u && GetTeamId() != TEAM_ALLIANCE' in guard
+    assert 'brambletownEntry == 910105u && GetTeamId() != TEAM_HORDE' in guard
+    print(f'PASS: scoped strict native Steward, mailbox, provider and faction guards in {checked_root}')
 if player is not None:
     for control in ('BrambleServices.Enable','BrambleServices.ProviderCount',
                     'BrambleServices.Access.GMOnly','BrambleServices.Interaction.AllowInCombat',

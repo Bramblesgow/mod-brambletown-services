@@ -2,6 +2,7 @@
 """Portable native Scribe patch/price regression; no running-server writes."""
 from pathlib import Path
 import os
+import re
 
 root = Path(__file__).resolve().parents[1]
 patch = (root/'patches/brambletown-npc-access-and-scribe-price-cap.patch').read_text()
@@ -21,6 +22,7 @@ assert 'UPDATE item_template' not in sql and 'DELETE FROM item_template' not in 
 
 # Staged core checks: verify actual custom hooks, not ordinary AzerothCore functions.
 staged_root = os.environ.get('BRAMBLETOWN_CORE_ROOT')
+assert staged_root != "", "BRAMBLETOWN_CORE_ROOT must be a non-empty directory when configured"
 if staged_root is not None:
     base = Path(staged_root)
     player_file = base/player
@@ -43,6 +45,7 @@ else:
 strict_value = os.environ.get('BRAMBLETOWN_REQUIRE_NEW_GUARD', '0')
 assert strict_value in ('0', '1'), 'BRAMBLETOWN_REQUIRE_NEW_GUARD must be 0 or 1'
 live_root = os.environ.get('AZEROTHCORE_LIVE_ROOT')
+assert live_root != "", "AZEROTHCORE_LIVE_ROOT must be a non-empty directory when configured"
 if strict_value == '1':
     assert live_root is not None or staged_root is not None, (
         'Strict native patch check needs AZEROTHCORE_LIVE_ROOT or BRAMBLETOWN_CORE_ROOT'
@@ -60,8 +63,15 @@ if strict_value == '1':
     assert 'price = std::min<uint64>(price, uint64(10000u) * count);' in installed_player, (
         'Overflow-safe Scribe purchase cap not installed'
     )
-    assert 'vendor->GetEntry() == 910103 && itemTemplate->Class == ITEM_CLASS_GLYPH' in installed_handler, (
-        'Native Scribe listing cap not installed'
+    # The condition alone is insufficient: require the price assignment
+    # immediately under the Scribe/glyph-specific native branch.
+    listing_cap = (
+        r'if\s*\(\s*vendor->GetEntry\(\)\s*==\s*910103\s*&&\s*'
+        r'itemTemplate->Class\s*==\s*ITEM_CLASS_GLYPH\s*&&\s*'
+        r'price\s*>\s*10000\s*\)\s*price\s*=\s*10000\s*;'
+    )
+    assert re.search(listing_cap, installed_handler), (
+        'Installed Scribe listing branch does not cap glyph prices'
     )
     print(f'PASS: strict native Scribe and Steward changes present in {checked_root}')
 elif live_root is not None:

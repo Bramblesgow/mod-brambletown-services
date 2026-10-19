@@ -103,15 +103,21 @@ preserved in its header.
 
 ## Development validation
 
-In the isolated development worktree, use:
+From the **reviewed checkout**, run the portable source checks:
 
 ```bash
-cd /root/brambletown-services-work/mod-brambletown-services
-set -e
+set -euo pipefail
 for test in tests/test_*.py; do python3 "$test"; done
-python3 tests/check_cpp_syntax.py
-cmake --build /root/brambletown-upgrade-work/build-production --target worldserver -j 2
 ```
+
+For optional **syntax-only** C++ verification using an existing compatible
+AzerothCore compilation database (no build or link):
+
+```bash
+AZEROTHCORE_COMPILE_COMMANDS=/path/to/compile_commands.json python3 tests/check_cpp_syntax.py
+```
+
+Do not compile, link or install the running realm executable during review.
 
 Optional installed-source checks use PLAYERBOTS_SRC (Playerbots src),
 SPELL_ICON_DBC (SpellIcon.dbc), SPELL_ENCHANT_DBC
@@ -136,6 +142,9 @@ takes precedence for strict verification. These checks do not substitute
 for a linked build or in-game verification.
 The new portable checks also assert mailbox registration, script-name
 migration, vendor inventory capacity protection and Engineering visibility.
+The Steward mailbox NPC flag enables direct mailbox packets: the native core
+patch also enforces `BrambleServices.Service.Mailbox` when handling those
+packets, in addition to the normal GM-only and provider-level restrictions.
 
 The **151-entry golden fixture** at `tests/enchant_action_baseline.json` is a
 regression baseline for enchant gossip actions, DBC IDs and equipment slots.
@@ -144,9 +153,9 @@ auction faction behavior, all five provider configurations and Fish Feast
 coordination. See `docs/CODE_REVIEW_2026-10-15.md` for review findings and
 remaining runtime-test limits.
 
-This command builds the isolated development binary only; it does **not**
-replace `/root/azerothcore-wotlk/env/dist/bin/worldserver`, restart the server,
-or apply SQL. Deploy only after approval, with backup and online-player warning.
+The source checks and syntax-only verification do **not** replace the
+running worldserver executable, restart the server, or apply SQL.
+A linked build and runtime tests require separate authorization.
 
 ### Rejected-command feedback (October 15, 2026, staged)
 

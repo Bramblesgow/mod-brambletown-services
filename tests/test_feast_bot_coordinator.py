@@ -7,7 +7,8 @@ s=(r/'src/brambletown_npc_services.cpp').read_text()
 h=(r/'src/brambletown_npc_services.h').read_text()
 c=(r/'conf/brambletown_services.conf.dist').read_text()
 playerbots_src=os.environ.get('PLAYERBOTS_SRC')
-if playerbots_src:
+assert playerbots_src != "", "PLAYERBOTS_SRC must be a non-empty directory when configured"
+if playerbots_src is not None:
     playerbots=Path(playerbots_src)
     playerbot_impl=(playerbots/'Ai/Base/Actions/UseItemAction.cpp').read_text()
     playerbot_manager=(playerbots/'Bot/PlayerbotMgr.h').read_text()
@@ -20,7 +21,7 @@ assert 'OfferFeastToNearbyBots(feast, player)' in s
 assert 'GO_SUMMON_TIMED_DESPAWN' in s
 assert 'feast->GetEntry() != FishFeastEntry' in s
 assert 'sPlayerbotsMgr.GetPlayerbotAI(bot)' in s
-if playerbots_src:
+if playerbots_src is not None:
     assert 'PlayerbotAI* GetPlayerbotAI(Player* player)' in playerbot_manager
     assert 'virtual bool DoSpecificAction(' in ai_header
     assert 'bool UseItemAction::UseGameObject(ObjectGuid guid)' in playerbot_impl
