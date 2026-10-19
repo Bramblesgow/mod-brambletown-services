@@ -120,6 +120,20 @@ and AZEROTHCORE_LIVE_ROOT (installed live AzerothCore root with DBC files).
 Without these variables, module-local regression checks run and external
 integration checks are clearly skipped. Explicitly configured invalid paths
 fail validation instead of silently passing.
+
+Before deployment, BRAMBLETOWN_CORE_ROOT may point to the existing staged
+source (which can still use native guard 910102). AZEROTHCORE_LIVE_ROOT
+points to the installed source, which is not required to contain the
+proposed changes until deployment.
+
+After an approved deployment, use strict source checks:
+BRAMBLETOWN_REQUIRE_NEW_GUARD=1 AZEROTHCORE_LIVE_ROOT=/path/to/core python3 tests/test_scribe_price_cap.py
+BRAMBLETOWN_REQUIRE_NEW_GUARD=1 AZEROTHCORE_LIVE_ROOT=/path/to/core python3 tests/test_providers_4_5.py
+
+Strict mode checks the target source for the new 910101 guard and Scribe
+caps. When both staged and installed roots are set, installed source
+takes precedence for strict verification. These checks do not substitute
+for a linked build or in-game verification.
 The new portable checks also assert mailbox registration, script-name
 migration, vendor inventory capacity protection and Engineering visibility.
 

@@ -5,14 +5,23 @@ import os,re,struct
 root=Path(__file__).resolve().parents[1]
 def optional_root(name):
     raw = os.environ.get(name)
-    if not raw:
+    if raw is None:
         return None
+    assert raw, f"{name} cannot be empty when explicitly configured"
     path = Path(raw)
     assert path.is_dir(), f"{name} must point to an existing AzerothCore root: {raw}"
     return path
 
 core=optional_root('BRAMBLETOWN_CORE_ROOT')
 live=optional_root('AZEROTHCORE_LIVE_ROOT')
+strict_value = os.environ.get('BRAMBLETOWN_REQUIRE_NEW_GUARD', '0')
+assert strict_value in ('0', '1'), 'BRAMBLETOWN_REQUIRE_NEW_GUARD must be 0 or 1'
+strict_guard = strict_value == '1'
+if strict_guard:
+    assert live or core, (
+        'Strict native guard verification requires AZEROTHCORE_LIVE_ROOT '
+        'or BRAMBLETOWN_CORE_ROOT'
+    )
 auction=(root/'sql/GM_STAGING_auctioneers.sql').read_text()
 goods=(root/'sql/GM_STAGING_general_goods_vendor.sql').read_text()
 config=(root/'conf/brambletown_services.conf.dist').read_text()
@@ -71,8 +80,17 @@ if player is not None:
 assert 'brambletownEntry >= 910101u && brambletownEntry <= 910106u' in native_patch
 # The separately deployed core may still carry the older guard until approved deployment.
 if player is not None:
+    # The staged core may retain the previous native guard until deployment.
     assert any(f'brambletownEntry >= {start}u && brambletownEntry <= 910106u' in player
                for start in (910101, 910102))
+if strict_guard:
+    checked_root = live or core
+    checked_path = checked_root/'src/server/game/Entities/Player/Player.cpp'
+    assert checked_path.is_file(), f'Strict guard source missing: {checked_path}'
+    assert 'brambletownEntry >= 910101u && brambletownEntry <= 910106u' in checked_path.read_text(), (
+        f'Steward entry 910101 is not protected in {checked_path}'
+    )
+    print(f'PASS: strict native Steward guard present in {checked_root}')
 if player is not None:
     for control in ('BrambleServices.Enable','BrambleServices.ProviderCount',
                     'BrambleServices.Access.GMOnly','BrambleServices.Interaction.AllowInCombat',
@@ -108,14 +126,21 @@ if live:
     raw=(live/'env/dist/bin/dbc/FactionTemplate.dbc').read_bytes()
     magic,num,fields,stride,string_size=struct.unpack_from('<4s4I',raw)
     assert magic==b'WDBC'
-    rows={rowid:(faction,our_mask) for i in range(num)
-          for rowid,faction,flags,our_mask in [struct.unpack_from('<4I',raw,20+i*stride)]}
-    assert rows[12][1]&2 and not (rows[12][1]&4)
-    assert rows[29][1]&4 and not (rows[29][1]&2)
+    faction_rows={rowid:(faction,our_mask) for i in range(num)
+                  for rowid,faction,flags,our_mask in [struct.unpack_from('<4I',raw,20+i*stride)]}
+    assert faction_rows[12][1] & 2
+    assert not (faction_rows[12][1] & 4)
+    assert faction_rows[29][1] & 4
+    assert not (faction_rows[29][1] & 2)
     # Shared ON -> neutral pool for both NPCs; Shared OFF -> each NPC's faction pool.
     def expected_ah_house(shared, npc_template_faction):
-        if shared: return 'Neutral'
-        return 'Alliance' if rows[npc_template_faction][1]&2 else 'Horde' if rows[npc_template_faction][1]&4 else 'Neutral'
+        if shared:
+            return 'Neutral'
+        if faction_rows[npc_template_faction][1] & 2:
+            return 'Alliance'
+        if faction_rows[npc_template_faction][1] & 4:
+            return 'Horde'
+        return 'Neutral'
     assert [expected_ah_house(True,f) for f in (12,29)]==['Neutral','Neutral']
     assert [expected_ah_house(False,f) for f in (12,29)]==['Alliance','Horde']
 else:

@@ -35,7 +35,19 @@ gate = 'if (brambletownEntry >= 910101u && brambletownEntry <= 910106u)'
 assert gate in access
 gate_tail = access.split(gate, 1)[1]
 assert gate_tail.lstrip().startswith('{')
-gate_body = gate_tail.split('}\n', 1)[0]
+opening = gate_tail.index('{')
+depth = 0
+closing = None
+for i in range(opening, len(gate_tail)):
+    if gate_tail[i] == '{':
+        depth += 1
+    elif gate_tail[i] == '}':
+        depth -= 1
+        if depth == 0:
+            closing = i
+            break
+assert closing is not None, 'Unbalanced braces in native NPC guard'
+gate_body = gate_tail[opening + 1:closing]
 required_checks = (
     'GetSession()->IsHeadless()',
     'BrambleServices.Enable',
@@ -72,25 +84,6 @@ assert re.search(listing_cap, listing), 'Scribe UI cap is not scoped correctly'
 assert len(re.findall(r'\bprice\s*=\s*', purchase)) == 1, 'Unreviewed purchase price assignment'
 assert len(re.findall(r'\bprice\s*=\s*', listing)) == 1, 'Unreviewed listing price assignment'
 
-# Enforce the intended pricing algebra for bundles that the native vendor
-# handles: one discounted BuyCount bundle has one displayed price; buying
-# n bundles must charge n times that capped price. Non-Scribe merchants and
-# non-glyph items must retain the uncapped price.
-def offered(discounted_bundle_price, vendor_id, is_glyph):
-    return min(discounted_bundle_price, 10000) if vendor_id == 910103 and is_glyph else discounted_bundle_price
-
-
-def charged(discounted_bundle_price, number_of_bundles, vendor_id, is_glyph):
-    uncapped = discounted_bundle_price * number_of_bundles
-    cap = 10000 * number_of_bundles
-    return min(uncapped, cap) if vendor_id == 910103 and is_glyph else uncapped
-
-
-for price in (0, 1, 9999, 10000, 10001, 25000, 1_000_000):
-    for count in (1, 2, 3, 100, 255):
-        assert charged(price, count, 910103, True) == offered(price, 910103, True) * count
-        for merchant_id, glyph in ((1, True), (910102, True), (910106, True), (910103, False)):
-            assert offered(price, merchant_id, glyph) == price
-            assert charged(price, count, merchant_id, glyph) == price * count
-
-print('PASS: scoped native GM access and glyph price-cap paths; quantity and ordinary-vendor invariants')
+# The source contracts above verify the actual added C++ code paths.
+# Neither pricing nor NPC interaction has been executed in game.
+print('PASS: scoped native permission and Scribe glyph price-cap patch contracts')

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Validate the actual 3.3.5a DBC restrictions, slots, scope IDs and gossip. No writes."""
+"""Validate enchant action contracts; optionally check installed 3.3.5a DBC. No writes."""
 from pathlib import Path
 import json,re,struct,os
 root=Path(__file__).resolve().parents[1]
 src=(root/'src/brambletown_enchanter.cpp').read_text()
 steward=(root/'src/brambletown_npc_services.cpp').read_text()
 dbc_file=os.environ.get('SPELL_ENCHANT_DBC')
-if dbc_file:
+if dbc_file is not None:
     assert Path(dbc_file).is_file(), f"SpellItemEnchantment DBC not found: {dbc_file}"
     dbc=Path(dbc_file).read_bytes()
 else:
@@ -59,4 +59,5 @@ assert {str(k):{'enchant':eid,'slot':slot} for k,(eid,slot) in choices.items()} 
 # User-requested priority: summon submenu is first item at initial Steward greeting.
 hello=steward.split('bool BrambletownNpcServices::OnGossipHello',1)[1].split('bool BrambletownNpcServices::OnGossipSelect',1)[0]
 assert hello.index('Call another service provider...') < hello.index('// Restore Health and Mana')
-print('PASS: 151 enchant action/slot combinations, action fixture, 11 scope options, leveling bonuses, Steward summon first')
+print('PASS: 151 enchant action/slot combinations, action fixture, 11 scope options, leveling bonuses, Steward summon first '
+      + ('(external DBC verified)' if dbc is not None else '(external DBC skipped)'))
