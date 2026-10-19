@@ -20,9 +20,10 @@ original review **PR #1**, the stacked fixes **PR #2** (base commit
 | Playerbots tests require hardcoded checkout | Fixed in #2, hardened here | Optional `PLAYERBOTS_SRC`; explicitly empty setting rejected |
 | `SpellIcon.dbc` required at server-only path | Fixed in #2 | `SPELL_ICON_DBC` opt-in; invalid configured path fails |
 
-These ten review threads remain unresolved on PR #1 because PR #1 itself
-does not contain the stacked PR #2 corrections. Resolution should follow
-the actual merging/rebasing of the fixes, not merely a green test on another branch.
+At the start of this review all ten threads were unresolved on PR #1.
+After evidence-based replies, CodeRabbit automatically marked nine resolved;
+the checkout-action pin thread remains open pending integration. These review
+thread states do **not** mean that PR #2 has been merged into PR #1.
 
 ## PR #2: thirteen inline threads
 
