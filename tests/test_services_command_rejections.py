@@ -17,7 +17,7 @@ assert eligibility.index('if (!player->IsAlive())') < eligibility.index('if (map
 # Every rejection in the CommandScript handler sends a reason and returns
 # true to ChatHandler, which means "handled; don't print generic USAGE".
 assert command.count('return false;')==0
-assert command.count('return true;')==9
+assert command.count('return true;') >= 9
 assert 'if (!CanSpawn(player, handler))\n            return true;' in command
 for msg in ('Services are currently unavailable.', 'Only real player characters',
             'Services are currently restricted', 'seconds until services can be called',

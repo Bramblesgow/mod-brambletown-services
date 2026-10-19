@@ -93,7 +93,7 @@ for provider in ("Steward", "Enchanter", "Scribe", "Auctioneer", "General Goods"
 assert ".reload config" in maintainer
 assert "maximum 5" in maintainer
 assert "UPSTREAM_ENCHANTER_LICENSE.md" in maintainer
-assert "development binary" in maintainer
+assert "disposable object files" in maintainer
 
 print("PASS: static configuration/command/lifecycle invariants")
 print("NOTE: no C++ compilation, linked API checks, database tests, or gameplay tests performed")
@@ -101,7 +101,7 @@ print("NOTE: no C++ compilation, linked API checks, database tests, or gameplay 
 # Steward-only spawning and owner-gated, on-demand provider summons.
 assert 'for (Provider const& provider : providers)' not in coordinator
 assert 'SpawnAt(player, player, stewardProvider, duration * 1000u)' in coordinator
-assert 'SpawnAt(player, steward, provider, static_cast<uint32>(remaining))' in coordinator
+assert 'SpawnAt(player, steward, provider, remainingMs)' in coordinator
 assert 'it->second.stewardGuid != steward->GetGUID()' in coordinator
 assert 'group->requestedProviders.contains(index)' in coordinator
 assert 'group->expiresAt - Clock::now()' in coordinator
