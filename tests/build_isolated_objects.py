@@ -9,7 +9,10 @@ import sys
 import tempfile
 
 root = Path(__file__).resolve().parents[1]
-build = Path(os.environ.get("BRAMBLETOWN_BUILD_DIR", "/root/brambletown-upgrade-work/build-production"))
+configured = os.environ.get("BRAMBLETOWN_BUILD_DIR")
+if not configured:
+    sys.exit("Set BRAMBLETOWN_BUILD_DIR to a build directory with compile_commands.json")
+build = Path(configured)
 database = build / "compile_commands.json"
 if not database.is_file():
     sys.exit(f"No AzerothCore compile database: {database}")
@@ -18,7 +21,9 @@ entries = [entry for entry in commands if "/modules/" in entry["file"] and entry
 if not entries:
     sys.exit("No AzerothCore module compiler command found")
 sample = next((item for item in entries if item["file"].endswith("/mod-brambletown-services/src/MP_loader.cpp")), entries[0])
-args = shlex.split(sample["command"])
+args = shlex.split(sample.get("command", ""))
+if "-o" not in args:
+    sys.exit("Unsupported compile command (missing -o)")
 args = args[:args.index("-o")] + ["-I" + str(root / "src")]
 sources = sorted((root / "src").glob("*.cpp"))
 with tempfile.TemporaryDirectory(prefix="brambletown-module-objects-") as dirname:

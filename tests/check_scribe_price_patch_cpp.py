@@ -13,8 +13,14 @@ import sys
 import tempfile
 
 root = Path(__file__).resolve().parents[1]
-core = Path(os.environ.get("BRAMBLETOWN_NATIVE_BASE_ROOT", "/root/azerothcore-wotlk"))
-build = Path(os.environ.get("BRAMBLETOWN_BUILD_DIR", "/root/brambletown-upgrade-work/build-production"))
+configured_core = os.environ.get("BRAMBLETOWN_NATIVE_BASE_ROOT")
+if not configured_core:
+    sys.exit("Set BRAMBLETOWN_NATIVE_BASE_ROOT to the unpatched AzerothCore source root")
+configured_build = os.environ.get("BRAMBLETOWN_BUILD_DIR")
+if not configured_build:
+    sys.exit("Set BRAMBLETOWN_BUILD_DIR to a build directory with compile_commands.json")
+core = Path(configured_core)
+build = Path(configured_build)
 patch = root / "patches/brambletown-npc-access-and-scribe-price-cap.patch"
 database = build / "compile_commands.json"
 for required in (patch, database):
@@ -52,7 +58,9 @@ with tempfile.TemporaryDirectory(prefix="brambletown-native-patch-") as temp:
         if len(matches) != 1:
             sys.exit(f"Expected one compile command for {name}, found {len(matches)}")
         entry = matches[0]
-        cmd = shlex.split(entry["command"])
+        cmd = shlex.split(entry.get("command", ""))
+        if "-o" not in cmd:
+            sys.exit(f"Unsupported compile command for {name} (missing -o)")
         cmd = cmd[:cmd.index("-o")] + [
             "-fsyntax-only", "-Wno-unused-parameter",
             "-I" + str((core / name).parent), str(scratch / name)

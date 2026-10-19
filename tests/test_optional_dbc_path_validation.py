@@ -15,5 +15,7 @@ for variable, test in (
     result = subprocess.run([sys.executable, str(root / "tests" / test)],
                             cwd=root, env=environment, capture_output=True, text=True)
     assert result.returncode != 0, f"{variable}= should fail rather than skip"
-    assert variable in result.stderr + result.stdout, f"No informative failure for {variable}"
+    assert f"{variable} must not be empty when configured" in result.stderr + result.stdout, (
+        f"No empty-path failure for {variable}"
+    )
 print("PASS: both explicitly empty optional DBC paths reject validation")

@@ -382,10 +382,11 @@ struct BrambletownStewardAI : ScriptedAI
             {
                 // A rejected "go" request must not be treated as movement in progress.
                 // Retry at most three times, separated by three coordinator ticks.
-                if (pending.moveRetryDelayMs > 0)
-                    pending.moveRetryDelayMs = pending.moveRetryDelayMs > 1000 ? pending.moveRetryDelayMs - 1000 : 0;
+                if (pending.moveRetryDelayMs > 1000)
+                    pending.moveRetryDelayMs -= 1000;
                 else
                 {
+                    pending.moveRetryDelayMs = 0;
                     ++pending.moveAttempts;
                     pending.moveRequested = ai->DoSpecificAction("go", Event("go", link), true);
                     if (!pending.moveRequested)

@@ -43,6 +43,10 @@ jobs:
           persist-credentials: false
       - name: Compile reviewed NPC Services code and apply/check native patch
         shell: bash
+        env:
+          AZEROTHCORE_COMPILE_COMMANDS: ${{ vars.AZEROTHCORE_COMPILE_COMMANDS }}
+          BRAMBLETOWN_BUILD_DIR: ${{ vars.BRAMBLETOWN_BUILD_DIR }}
+          BRAMBLETOWN_NATIVE_BASE_ROOT: ${{ vars.BRAMBLETOWN_NATIVE_BASE_ROOT }}
         run: |
           set -euo pipefail
           python3 tests/check_cpp_syntax.py

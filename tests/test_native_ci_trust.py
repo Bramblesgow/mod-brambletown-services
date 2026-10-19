@@ -12,4 +12,7 @@ assert workflow.count("runs-on: self-hosted") == 1
 native = workflow.split("  native-core-validation:", 1)[1]
 assert re.search(r"if:.*github.event_name == 'push'.*github.ref == 'refs/heads/main'.*github.ref_protected", native)
 assert "tests/check_scribe_price_patch_cpp.py" in native
-print("PASS: native CI is gated to protected-main push; checkout credentials disabled")
+for variable in ("AZEROTHCORE_COMPILE_COMMANDS", "BRAMBLETOWN_BUILD_DIR",
+                 "BRAMBLETOWN_NATIVE_BASE_ROOT"):
+    assert f"{variable}: ${{{{ vars.{variable} }}}}" in native
+print("PASS: native CI requires protected-main push and explicit runner paths; no checkout credentials")

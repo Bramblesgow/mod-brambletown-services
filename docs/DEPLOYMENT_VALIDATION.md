@@ -13,7 +13,12 @@ the running realm.
    unpatched core. Do not apply a patch twice to staged or production sources.
 4. GitHub's portable Python checks do not establish C++ compilation. The optional
    native GitHub job runs only for pushes to main only when GitHub reports that ref protected; additionally control runner registration/repository access at the GitHub organization or runner-group level on a configured self-hosted runner. A skipped
-   native job is not a verified build.
+   native job is not a verified build. The protected-main native job requires
+   three explicitly configured GitHub Actions repository/organization variables
+   on the authorized runner: AZEROTHCORE_COMPILE_COMMANDS (compile database),
+   BRAMBLETOWN_BUILD_DIR (matching build output directory), and
+   BRAMBLETOWN_NATIVE_BASE_ROOT (unpatched matching AzerothCore source).
+   Missing values must fail native validation; do not use hardcoded fallbacks.
 5. Link and test an isolated development worldserver; obtain approval before
    installing any files.
 
