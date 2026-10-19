@@ -1,20 +1,33 @@
 #!/usr/bin/env python3
-"""Compile only the draft module sources to isolated object files, with live server untouched."""
+"""Compile the reviewed module's C++ objects into an ephemeral directory only."""
+import json
+import os
 from pathlib import Path
-import json,shlex,subprocess,sys
-root=Path('/root/brambletown-services-work/mod-brambletown-services')
-out=Path('/root/brambletown-services-work/staging-objects')
-out.mkdir(parents=True,exist_ok=True)
-db=json.loads(Path('/root/brambletown-upgrade-work/build-production/compile_commands.json').read_text())
-sample=next(e for e in db if e['file'].endswith('/mod-custom-login/src/CL_loader.cpp'))
-args=shlex.split(sample['command'])
-args=args[:args.index('-o')] + ['-I'+str(root/'src')]
-for source in sorted((root/'src').glob('*.cpp')):
-    output=out/(source.stem+'.o')
-    print(f'BUILD {source.name} -> {output.name}',flush=True)
-    r=subprocess.run(args+['-o',str(output),'-c',str(source)],cwd=sample['directory'],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
-    print(r.stdout[-15000:],flush=True)
-    if r.returncode:
-        print(f'FAILED {source.name}',flush=True)
-        sys.exit(r.returncode)
-print('PASS: three isolated C++ object files created. NOT linked into worldserver.',flush=True)
+import shlex
+import subprocess
+import sys
+import tempfile
+
+root = Path(__file__).resolve().parents[1]
+build = Path(os.environ.get("BRAMBLETOWN_BUILD_DIR", "/root/brambletown-upgrade-work/build-production"))
+database = build / "compile_commands.json"
+if not database.is_file():
+    sys.exit(f"No AzerothCore compile database: {database}")
+commands = json.loads(database.read_text())
+entries = [entry for entry in commands if "/modules/" in entry["file"] and entry["file"].endswith(".cpp")]
+if not entries:
+    sys.exit("No AzerothCore module compiler command found")
+sample = next((item for item in entries if item["file"].endswith("/mod-brambletown-services/src/MP_loader.cpp")), entries[0])
+args = shlex.split(sample["command"])
+args = args[:args.index("-o")] + ["-I" + str(root / "src")]
+sources = sorted((root / "src").glob("*.cpp"))
+with tempfile.TemporaryDirectory(prefix="brambletown-module-objects-") as dirname:
+    for source in sources:
+        output = Path(dirname) / (source.stem + ".o")
+        print(f"BUILD {source.relative_to(root)}", flush=True)
+        result = subprocess.run(args + ["-o", str(output), "-c", str(source)],
+                                cwd=sample["directory"], capture_output=True, text=True)
+        if result.returncode:
+            print((result.stdout + result.stderr)[-18000:], flush=True)
+            sys.exit(f"Compilation failed: {source}")
+print(f"PASS: compiled {len(sources)} isolated module C++ objects (no linking/deployment)", flush=True)

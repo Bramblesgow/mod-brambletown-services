@@ -3,7 +3,7 @@ name: NPC Services portable source checks
 on:
   pull_request:
   push:
-    branches: [master]
+    branches: [main]
 
 permissions:
   contents: read
@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout reviewed module
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Run portable Python source checks
         shell: bash
@@ -27,3 +29,22 @@ jobs:
         run: |
           echo "These are static source-contract checks only."
           echo "They do not compile C++, apply the native core patch, alter SQL, or test gameplay."
+
+  # Opt-in: needs an authorized self-hosted runner with the AzerothCore
+  # compile database and matching Playerbots headers. A skipped job is NOT
+  # native compilation approval; reviewers must inspect its status.
+  native-core-validation:
+    if: ${{ vars.BRAMBLETOWN_NATIVE_CI_ENABLED == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' && github.ref_protected }}
+    runs-on: self-hosted
+    steps:
+      - name: Checkout exact PR commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Compile reviewed NPC Services code and apply/check native patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tests/check_cpp_syntax.py
+          python3 tests/build_isolated_objects.py
+          python3 tests/check_scribe_price_patch_cpp.py

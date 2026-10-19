@@ -15,6 +15,7 @@
 #include "GameObject.h"
 #include "ScriptedCreature.h"
 #include "ObjectAccessor.h"
+#include "TemporarySummon.h"
 #include "SpellAuras.h"
 #include "PlayerbotMgr.h"
 #include "PlayerbotAI.h"
@@ -150,6 +151,8 @@ struct BrambletownStewardAI : ScriptedAI
     {
         ObjectGuid guid;
         bool moveRequested = false;
+        uint8 moveAttempts = 0;
+        uint32 moveRetryDelayMs = 0;
         bool useRequested = false;
         bool foodStarted = false;
         bool fallbackCast = false;
@@ -375,11 +378,25 @@ struct BrambletownStewardAI : ScriptedAI
                 }
                 allDone = false;
             }
-            else if (!pending.moveRequested && ai->GetMaster())
+            else if (!pending.moveRequested && ai->GetMaster() && pending.moveAttempts < 3)
             {
-                pending.moveRequested = true;
-                ai->DoSpecificAction("go", Event("go", link), true);
+                // A rejected "go" request must not be treated as movement in progress.
+                // Retry at most three times, separated by three coordinator ticks.
+                if (pending.moveRetryDelayMs > 0)
+                    pending.moveRetryDelayMs = pending.moveRetryDelayMs > 1000 ? pending.moveRetryDelayMs - 1000 : 0;
+                else
+                {
+                    ++pending.moveAttempts;
+                    pending.moveRequested = ai->DoSpecificAction("go", Event("go", link), true);
+                    if (!pending.moveRequested)
+                        pending.moveRetryDelayMs = 3000;
+                }
                 allDone = false;
+            }
+            else if (!pending.moveRequested)
+            {
+                // No bot master or all attempts rejected: end cleanly, never loop forever.
+                pending.completed = true;
             }
             else
                 allDone = false;
@@ -554,6 +571,19 @@ bool BrambletownNpcServices::OnGossipSelect(Player* player, Creature* creature, 
         case 11: // Prepare a communal Fish Feast just ahead of the Steward.
         {
             CloseGossipMenuFor(player);
+            // This Steward's AI runs bot eating for up to 28 seconds. Near
+            // despawn, reject the request instead of stranding bots mid-meal.
+            // Reserve two seconds for the world update/despawn boundary.
+            if (sConfigMgr->GetOption<bool>("BrambleServices.Service.FishFeast.AutoBots", true))
+            {
+                TempSummon* summon = creature ? creature->ToTempSummon() : nullptr;
+                if (!summon || summon->GetTimer() <= 30000u)
+                {
+                    ChatHandler(player->GetSession()).SendNotification(
+                        "This Steward is expiring too soon to coordinate a Fish Feast. Call a new Steward.");
+                    return false;
+                }
+            }
             if (player->IsInCombat())
             {
                 ChatHandler(player->GetSession()).SendNotification("Fish Feast cannot be prepared during combat.");

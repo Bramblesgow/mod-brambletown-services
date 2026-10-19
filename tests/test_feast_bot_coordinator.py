@@ -37,7 +37,7 @@ assert 'feast->IsWithinDistInMap(bot, feast->GetInteractionDistance())' in s
 assert 'ai->DoSpecificAction("use", Event("use", link), true)' in s
 assert 'ai->DoSpecificAction("go", Event("go", link), true)' in s
 assert 'ai->GetMaster()' in s # no random/unmanaged bot movement orders
-assert 'pending.moveRequested = true' in s and 'pending.useRequested = true' in s
+assert 'pending.moveRequested = ai->DoSpecificAction("go", Event("go", link), true)' in s and 'pending.useRequested = true' in s
 assert 'windowMs = 28000' in s and 'tickMs = 1000' in s
 for setting in ('AutoBots','BotRadius','BotMax'):
     field=f'BrambleServices.Service.FishFeast.{setting}'
