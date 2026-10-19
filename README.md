@@ -106,11 +106,12 @@ preserved in its header.
 In the isolated development worktree, use:
 
 ```bash
-cd /root/brambletown-services-work/mod-brambletown-services
+cd /path/to/reviewed/mod-brambletown-services
 set -e
 for test in tests/test_*.py; do python3 "$test"; done
 python3 tests/check_cpp_syntax.py
-cmake --build /root/brambletown-upgrade-work/build-production --target worldserver -j 2
+python3 tests/build_isolated_objects.py
+python3 tests/check_scribe_price_patch_cpp.py
 ```
 
 Optional installed-source checks use PLAYERBOTS_SRC (Playerbots src),
@@ -144,9 +145,20 @@ auction faction behavior, all five provider configurations and Fish Feast
 coordination. See `docs/CODE_REVIEW_2026-10-15.md` for review findings and
 remaining runtime-test limits.
 
-This command builds the isolated development binary only; it does **not**
-replace `/root/azerothcore-wotlk/env/dist/bin/worldserver`, restart the server,
-or apply SQL. Deploy only after approval, with backup and online-player warning.
+The above commands compile the exact checkout into disposable object files and
+syntax-check the core patch on a clean, isolated AzerothCore source copy.
+They do **not** link worldserver, restart the server, or apply SQL. The native
+compiler uses `BRAMBLETOWN_NATIVE_BASE_ROOT` (default `/root/azerothcore-wotlk`),
+while the CMake compile database uses `BRAMBLETOWN_BUILD_DIR` (default
+`/root/brambletown-upgrade-work/build-production`). Source contracts alone do
+not establish in-game behavior.
+
+GitHub CI always runs portable regression scripts. The separate native compiler
+job runs **only** when repository variable `BRAMBLETOWN_NATIVE_CI_ENABLED=true`
+and an authorized `self-hosted` runner with the matching core and Playerbots
+build is available. A skipped native job is *not* C++ build verification.
+See `docs/DEPLOYMENT_VALIDATION.md` for approved deployment order and runtime
+verification gates. Never deploy before approval, backups and player warning.
 
 ### Rejected-command feedback (October 15, 2026, staged)
 
