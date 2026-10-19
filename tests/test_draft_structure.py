@@ -93,7 +93,8 @@ for provider in ("Steward", "Enchanter", "Scribe", "Auctioneer", "General Goods"
 assert ".reload config" in maintainer
 assert "maximum 5" in maintainer
 assert "UPSTREAM_ENCHANTER_LICENSE.md" in maintainer
-assert "development binary" in maintainer
+assert "syntax-only" in maintainer
+assert "Do not compile, link or install" in maintainer
 
 print("PASS: static configuration/command/lifecycle invariants")
 print("NOTE: no C++ compilation, linked API checks, database tests, or gameplay tests performed")
