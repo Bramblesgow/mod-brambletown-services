@@ -114,3 +114,12 @@ The integrated PR #5 strengthens the test to require the documented
 `AZEROTHCORE_COMPILE_COMMANDS=/path/to/compile_commands.json python3 tests/check_cpp_syntax.py`
 invocation. The README already contains this command. The original PR #4
 remains unmerged; this finding is addressed in the PR #5 integration branch.
+
+## Additional validation regression discovered during PR #5 consolidation
+
+A negative test showed that `SPELL_ICON_DBC=` incorrectly skipped the external
+SpellIcon DBC check in `test_steward_menu_layout.py` because the test used
+truthiness. PR #5 now distinguishes an unset optional environment variable
+from an explicitly empty value and rejects the latter, matching the earlier
+CodeRabbit finding from PR #2. An explicit negative test must fail while a
+valid configured SpellIcon.dbc must pass.
