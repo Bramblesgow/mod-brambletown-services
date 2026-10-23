@@ -7,6 +7,7 @@ src=(root/'src/brambletown_enchanter.cpp').read_text()
 steward=(root/'src/brambletown_npc_services.cpp').read_text()
 dbc_file=os.environ.get('SPELL_ENCHANT_DBC')
 if dbc_file is not None:
+    assert dbc_file, 'SPELL_ENCHANT_DBC must not be empty when configured'
     assert Path(dbc_file).is_file(), f"SpellItemEnchantment DBC not found: {dbc_file}"
     dbc=Path(dbc_file).read_bytes()
 else:

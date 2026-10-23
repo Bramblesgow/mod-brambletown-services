@@ -153,9 +153,24 @@ auction faction behavior, all five provider configurations and Fish Feast
 coordination. See `docs/CODE_REVIEW_2026-10-15.md` for review findings and
 remaining runtime-test limits.
 
-The source checks and syntax-only verification do **not** replace the
-running worldserver executable, restart the server, or apply SQL.
-A linked build and runtime tests require separate authorization.
+The above source checks are not runtime tests. The optional C++ validators
+compile exactly this review checkout to temporary objects, and the native
+validator applies the patch to disposable unpatched AzerothCore sources.
+They never link, install, restart, or apply SQL.
+
+For nonproduction native checks on the authorized development machine,
+set `AZEROTHCORE_COMPILE_COMMANDS` for syntax validation and
+`BRAMBLETOWN_BUILD_DIR` for object and patch validation. Run:
+
+```bash
+AZEROTHCORE_COMPILE_COMMANDS=/path/to/compile_commands.json python3 tests/check_cpp_syntax.py
+BRAMBLETOWN_BUILD_DIR=/path/to/build python3 tests/build_isolated_objects.py
+BRAMBLETOWN_BUILD_DIR=/path/to/build BRAMBLETOWN_NATIVE_BASE_ROOT=/path/to/unpatched/core python3 tests/check_scribe_price_patch_cpp.py
+```
+
+Native GitHub validation is opt-in and runs only on trusted pushes to
+protected `main` with an authorized self-hosted runner. Skipped native CI
+is not build verification. See `docs/DEPLOYMENT_VALIDATION.md`.
 
 ### Rejected-command feedback (October 15, 2026, staged)
 
