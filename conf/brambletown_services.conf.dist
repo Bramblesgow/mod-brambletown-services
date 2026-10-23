@@ -1,0 +1,162 @@
+# BRAMBLETOWN SERVICES - DISTRIBUTION CONFIGURATION TEMPLATE
+# Shipped defaults: master switch and optional providers start disabled.
+# Copy or merge these settings into the installed module configuration.
+# Edit settings, save this file, then run .reload config in-game as GM.
+# WARNING: .reload config reloads all worldserver/module configs, not only Services.
+# Setting changes affect future commands, interactions and summons.
+# Existing summoned NPCs retain their original appearance and expiration.
+# NPC names, titles, vendor items and enchant/glyph content are not configured here.
+# Boolean settings: 0 = disabled, 1 = enabled. Other ranges are noted below.
+
+# ====================================================================
+# 01  MODULE AVAILABILITY AND PLAYER ACCESS
+# ====================================================================
+# Enable the entire Brambletown Services module and its .services command.
+BrambleServices.Enable = 0
+# Restrict Services to Game Masters (GM security level 2+) when set to 1; set to 0 for all players.
+BrambleServices.Access.GMOnly = 1
+
+# ====================================================================
+# 02  SUMMON LIFETIME AND LOCATION RESTRICTIONS
+# ====================================================================
+# Steward and secondary-provider lifetime AND initial-summon cooldown, in seconds (30-600).
+BrambleServices.DurationSeconds = 120
+# Allow using .services to summon the Steward while in combat. Does not enable combat-time menu actions.
+BrambleServices.AllowInCombat = 0
+# Allow interacting with Service NPC menus while in combat; individual actions may still block combat.
+BrambleServices.Interaction.AllowInCombat = 0
+# Allow summoning and using Services in dungeons and raids. Arenas and battlegrounds remain restricted.
+BrambleServices.AllowInInstances = 0
+
+# ====================================================================
+# 03  PROVIDER SETTINGS
+# ====================================================================
+# Number of available provider slots (maximum 5). .services summons only Provider 1; other providers are requested through the Steward.
+BrambleServices.ProviderCount = 5
+
+# ====================================================================
+# 04  PROVIDER 1 - BRAMBLETOWN STEWARD
+# ====================================================================
+# Enable the Steward (required to access additional providers).
+BrambleServices.Provider.1.Enable = 1
+# Steward NPC template ID. Fixed by module gossip/access checks; do not change.
+BrambleServices.Provider.1.Entry = 910101
+# Override Steward appearance by client display ID; 0 uses the NPC template model.
+BrambleServices.Provider.1.DisplayId = 31833
+# Summon offset in yards FORWARD (+) or BEHIND (-) the player, relative to player facing.
+BrambleServices.Provider.1.OffsetX = 2.2
+# Summon offset in yards LEFT (+) or RIGHT (-) of the player, relative to player facing.
+BrambleServices.Provider.1.OffsetY = 1.0
+
+# ====================================================================
+# 05  PROVIDER 2 - ENCHANTER
+# ====================================================================
+# Allow the Steward to summon the Enchanter.
+BrambleServices.Provider.2.Enable = 0
+# Enchanter NPC template ID. Fixed by the module/native access checks; do not change.
+BrambleServices.Provider.2.Entry = 910102
+# Appearance override; 0 uses the Enchanter template model.
+BrambleServices.Provider.2.DisplayId = 9353
+# Forward (+) / behind (-) the Steward, in yards.
+BrambleServices.Provider.2.OffsetX = -2.2
+# Left (+) / right (-) of the Steward, in yards.
+BrambleServices.Provider.2.OffsetY = 1.0
+
+# ====================================================================
+# 06  PROVIDER 3 - SCRIBE (GLYPHS)
+# ====================================================================
+# Allow the Steward to summon the Scribe, who offers class-specific glyphs.
+BrambleServices.Provider.3.Enable = 0
+# Scribe NPC template ID. Fixed by the module/native access checks; do not change.
+BrambleServices.Provider.3.Entry = 910103
+# Appearance override; 0 uses the Scribe template model.
+BrambleServices.Provider.3.DisplayId = 0
+# Forward (+) / behind (-) the Steward, in yards.
+BrambleServices.Provider.3.OffsetX = 0.0
+# Left (+) / right (-) of the Steward, in yards.
+BrambleServices.Provider.3.OffsetY = 3.0
+
+# ====================================================================
+# 07  PROVIDER 4 - FACTION AUCTIONEER
+# ====================================================================
+# Native auction rules use the realm setting for combined/separate markets.
+# Allow the Steward to summon the auctioneer appropriate for the player faction.
+BrambleServices.Provider.4.Enable = 0
+# Unused placeholder for faction auctioneers; keep at 0.
+BrambleServices.Provider.4.Entry = 0
+# Alliance Auctioneer template ID. Fixed by the native access checks; do not change.
+BrambleServices.Provider.4.AllianceEntry = 910104
+# Horde Auctioneer template ID. Fixed by the native access checks; do not change.
+BrambleServices.Provider.4.HordeEntry = 910105
+# Appearance override; use 0 to keep each faction auctioneer's NPC template model.
+BrambleServices.Provider.4.DisplayId = 0
+# Forward (+) / behind (-) the Steward, in yards.
+BrambleServices.Provider.4.OffsetX = 4.0
+# Left (+) / right (-) of the Steward, in yards.
+BrambleServices.Provider.4.OffsetY = 2.0
+
+# ====================================================================
+# 08  PROVIDER 5 - GENERAL GOODS AND REPAIRS
+# ====================================================================
+# Allow the Steward to summon the General Goods merchant.
+BrambleServices.Provider.5.Enable = 0
+# General Goods NPC template ID. Fixed by the native access checks; do not change.
+BrambleServices.Provider.5.Entry = 910106
+# Appearance override; 0 uses the merchant template model.
+BrambleServices.Provider.5.DisplayId = 0
+# Forward (+) / behind (-) the Steward, in yards.
+BrambleServices.Provider.5.OffsetX = -4.0
+# Left (+) / right (-) of the Steward, in yards.
+BrambleServices.Provider.5.OffsetY = 2.0
+
+# ====================================================================
+# 09  STEWARD SERVICES - RESTORATION AND EQUIPMENT
+# ====================================================================
+# Show Restore HP and MP (restores health and mana, where applicable).
+BrambleServices.Service.Heal = 1
+# Show Remove Sickness (removes resurrection sickness).
+BrambleServices.Service.RemoveSickness = 1
+# Show Repair Items (repairs equipped gear).
+BrambleServices.Service.Repair = 1
+
+# ====================================================================
+# 10  STEWARD SERVICES - TALENTS AND UTILITIES
+# ====================================================================
+# Show Reset Talents (clear selected talent points for reassignment).
+BrambleServices.Service.ResetTalents = 1
+# Show Learn Dual Talents (grants dual talent specialization).
+BrambleServices.Service.DualSpec = 1
+# Show Bank (opens the personal bank).
+BrambleServices.Service.Bank = 1
+# Show Mail (opens the mailbox).
+BrambleServices.Service.Mailbox = 1
+
+# ====================================================================
+# 11  STEWARD SERVICES - FISH FEAST AND PLAYERBOTS
+# ====================================================================
+# Show Prepare Fish Feast (places one feast about two yards in front of each Steward).
+BrambleServices.Service.FishFeast = 1
+# Minimum character level for requesting a Fish Feast, clamped to 1-80.
+BrambleServices.Service.FishFeast.MinLevel = 1
+# Ask eligible nearby Playerbots to eat at EVERY new feast, refreshing an existing Well Fed buff too.
+BrambleServices.Service.FishFeast.AutoBots = 1
+# Initial search radius around the feast, in yards (3-25); only nearby bots are invited.
+BrambleServices.Service.FishFeast.BotRadius = 12.0
+# Maximum bots invited per feast (1-25); never exceeds the 25-player raid size.
+BrambleServices.Service.FishFeast.BotMax = 25
+
+# ====================================================================
+# 12  STEWARD SERVICES - FLASK BUFF
+# ====================================================================
+# Show Flask of the North (choose a Strength, Attack Power or Spell Power buff).
+BrambleServices.Service.FlaskOfNorth = 1
+
+# ====================================================================
+# 13  OPTIONAL GAMEPLAY OVERRIDES
+# ====================================================================
+# Allow resetting instance bindings; can affect dungeon and raid progression.
+BrambleServices.Service.ResetInstances = 0
+# Allow resetting spell cooldowns; changes ordinary ability limitations.
+BrambleServices.Service.ResetCooldowns = 0
+# Allow clearing the player combat state through the Steward.
+BrambleServices.Service.LeaveCombat = 0

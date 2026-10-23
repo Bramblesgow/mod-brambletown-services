@@ -1,0 +1,609 @@
+{
+  "purpose": "Preserve the 151 tested enchant action IDs, DBC IDs, and item slots across refactoring.",
+  "actions": {
+    "100": {
+      "enchant": 1103,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "101": {
+      "enchant": 3844,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "102": {
+      "enchant": 3869,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "103": {
+      "enchant": 3870,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "104": {
+      "enchant": 3789,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "105": {
+      "enchant": 3788,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "106": {
+      "enchant": 3790,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "107": {
+      "enchant": 2675,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "108": {
+      "enchant": 3239,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "109": {
+      "enchant": 3241,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "110": {
+      "enchant": 3851,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "111": {
+      "enchant": 3833,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "112": {
+      "enchant": 3834,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "113": {
+      "enchant": 2673,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "114": {
+      "enchant": 3225,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "115": {
+      "enchant": 3854,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "116": {
+      "enchant": 2670,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "117": {
+      "enchant": 3827,
+      "slot": "EQUIPMENT_SLOT_MAINHAND"
+    },
+    "118": {
+      "enchant": 1952,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "119": {
+      "enchant": 1128,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "120": {
+      "enchant": 3229,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "121": {
+      "enchant": 3849,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "122": {
+      "enchant": 1071,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "123": {
+      "enchant": 2653,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "124": {
+      "enchant": 3819,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "125": {
+      "enchant": 3820,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "126": {
+      "enchant": 3796,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "127": {
+      "enchant": 3842,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "128": {
+      "enchant": 3818,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "129": {
+      "enchant": 3817,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "130": {
+      "enchant": 3795,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "131": {
+      "enchant": 3815,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "132": {
+      "enchant": 3816,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "133": {
+      "enchant": 3814,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "134": {
+      "enchant": 3812,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "135": {
+      "enchant": 3813,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "136": {
+      "enchant": 3835,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "137": {
+      "enchant": 3836,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "138": {
+      "enchant": 3837,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "139": {
+      "enchant": 3838,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "140": {
+      "enchant": 3808,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "141": {
+      "enchant": 3809,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "142": {
+      "enchant": 3852,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "143": {
+      "enchant": 3811,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "144": {
+      "enchant": 3810,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "145": {
+      "enchant": 3794,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "146": {
+      "enchant": 3793,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "147": {
+      "enchant": 3859,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "148": {
+      "enchant": 3256,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "149": {
+      "enchant": 3728,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "150": {
+      "enchant": 3722,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "151": {
+      "enchant": 3730,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "152": {
+      "enchant": 3296,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "153": {
+      "enchant": 1951,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "154": {
+      "enchant": 3243,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "155": {
+      "enchant": 3294,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "156": {
+      "enchant": 1099,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "157": {
+      "enchant": 3831,
+      "slot": "EQUIPMENT_SLOT_BACK"
+    },
+    "158": {
+      "enchant": 3832,
+      "slot": "EQUIPMENT_SLOT_CHEST"
+    },
+    "159": {
+      "enchant": 3297,
+      "slot": "EQUIPMENT_SLOT_CHEST"
+    },
+    "160": {
+      "enchant": 2381,
+      "slot": "EQUIPMENT_SLOT_CHEST"
+    },
+    "161": {
+      "enchant": 3245,
+      "slot": "EQUIPMENT_SLOT_CHEST"
+    },
+    "162": {
+      "enchant": 1953,
+      "slot": "EQUIPMENT_SLOT_CHEST"
+    },
+    "163": {
+      "enchant": 3850,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "164": {
+      "enchant": 2332,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "165": {
+      "enchant": 3845,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "166": {
+      "enchant": 1147,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "167": {
+      "enchant": 3231,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "168": {
+      "enchant": 2661,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "169": {
+      "enchant": 1119,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "170": {
+      "enchant": 3763,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "171": {
+      "enchant": 3759,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "172": {
+      "enchant": 3760,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "173": {
+      "enchant": 3762,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "174": {
+      "enchant": 3761,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "175": {
+      "enchant": 3756,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "176": {
+      "enchant": 3757,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "177": {
+      "enchant": 3758,
+      "slot": "EQUIPMENT_SLOT_WRISTS"
+    },
+    "178": {
+      "enchant": 3249,
+      "slot": "EQUIPMENT_SLOT_HANDS"
+    },
+    "179": {
+      "enchant": 3253,
+      "slot": "EQUIPMENT_SLOT_HANDS"
+    },
+    "180": {
+      "enchant": 1603,
+      "slot": "EQUIPMENT_SLOT_HANDS"
+    },
+    "181": {
+      "enchant": 3222,
+      "slot": "EQUIPMENT_SLOT_HANDS"
+    },
+    "182": {
+      "enchant": 3234,
+      "slot": "EQUIPMENT_SLOT_HANDS"
+    },
+    "183": {
+      "enchant": 3231,
+      "slot": "EQUIPMENT_SLOT_HANDS"
+    },
+    "184": {
+      "enchant": 3853,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "185": {
+      "enchant": 3822,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "186": {
+      "enchant": 3823,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "187": {
+      "enchant": 3719,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "188": {
+      "enchant": 3721,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "189": {
+      "enchant": 3331,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "190": {
+      "enchant": 3332,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "191": {
+      "enchant": 1597,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "192": {
+      "enchant": 3232,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "193": {
+      "enchant": 983,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "194": {
+      "enchant": 1147,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "195": {
+      "enchant": 3244,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "196": {
+      "enchant": 3826,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "197": {
+      "enchant": 1075,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "198": {
+      "enchant": 3606,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "199": {
+      "enchant": 3603,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "200": {
+      "enchant": 3604,
+      "slot": "EQUIPMENT_SLOT_HANDS"
+    },
+    "201": {
+      "enchant": 3860,
+      "slot": "EQUIPMENT_SLOT_FEET"
+    },
+    "202": {
+      "enchant": 3839,
+      "slot": "EQUIPMENT_SLOT_FINGER1"
+    },
+    "203": {
+      "enchant": 3840,
+      "slot": "EQUIPMENT_SLOT_FINGER1"
+    },
+    "204": {
+      "enchant": 3791,
+      "slot": "EQUIPMENT_SLOT_FINGER1"
+    },
+    "205": {
+      "enchant": 1103,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "206": {
+      "enchant": 3844,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "207": {
+      "enchant": 3869,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "208": {
+      "enchant": 3870,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "209": {
+      "enchant": 3789,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "210": {
+      "enchant": 3788,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "211": {
+      "enchant": 3790,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "212": {
+      "enchant": 2675,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "213": {
+      "enchant": 3239,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "214": {
+      "enchant": 3241,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "215": {
+      "enchant": 3851,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "216": {
+      "enchant": 3833,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "217": {
+      "enchant": 3834,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "218": {
+      "enchant": 2673,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "219": {
+      "enchant": 3225,
+      "slot": "EQUIPMENT_SLOT_OFFHAND"
+    },
+    "220": {
+      "enchant": 103,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "221": {
+      "enchant": 91,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "222": {
+      "enchant": 209,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "223": {
+      "enchant": 1507,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "224": {
+      "enchant": 1508,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "225": {
+      "enchant": 1509,
+      "slot": "EQUIPMENT_SLOT_HEAD"
+    },
+    "226": {
+      "enchant": 103,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "227": {
+      "enchant": 91,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "228": {
+      "enchant": 209,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "229": {
+      "enchant": 2983,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "230": {
+      "enchant": 2981,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "231": {
+      "enchant": 2990,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "232": {
+      "enchant": 2992,
+      "slot": "EQUIPMENT_SLOT_SHOULDERS"
+    },
+    "233": {
+      "enchant": 103,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "234": {
+      "enchant": 91,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "235": {
+      "enchant": 209,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "236": {
+      "enchant": 3010,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "237": {
+      "enchant": 3011,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "238": {
+      "enchant": 3012,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "239": {
+      "enchant": 3013,
+      "slot": "EQUIPMENT_SLOT_LEGS"
+    },
+    "240": {
+      "enchant": 30,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "241": {
+      "enchant": 32,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "242": {
+      "enchant": 33,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "243": {
+      "enchant": 663,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "244": {
+      "enchant": 664,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "245": {
+      "enchant": 2722,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "246": {
+      "enchant": 2723,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "247": {
+      "enchant": 2724,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "248": {
+      "enchant": 3607,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "249": {
+      "enchant": 3608,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    },
+    "250": {
+      "enchant": 3843,
+      "slot": "EQUIPMENT_SLOT_RANGED"
+    }
+  }
+}

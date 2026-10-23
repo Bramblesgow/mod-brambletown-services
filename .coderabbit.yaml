@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+reviews:
+  profile: assertive
+  high_level_summary: true
+  request_changes_workflow: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "main"
+      - "review/complete-module-baseline-20261018"
+  path_instructions:
+    - path: "src/**/*.{cpp,h,hpp}"
+      instructions: |
+        This is an AzerothCore WotLK module with playerbots integration and a separate native-core patch.
+        Prioritize concrete memory safety bugs, session ownership, player vs bot eligibility,
+        stale GUID/handle access, race/lifecycle issues, cooldowns, false positive API
+        assumptions, security/permission bypasses, and reload/cleanup regressions.
+        Validate spell and aura state; do not recommend directly awarding Well Fed to bypass
+        the 10-second food process. Preserve bot rebuff-on-each-feast-drop behavior.
+        Review provider session-scoped vendors and auctioneer faction routing.
+        Flag only demonstrable defects; provide reproduction details when possible.
+    - path: "patches/**/*.patch"
+      instructions: |
+        The module requires a native AzerothCore patch for provider access/price handling.
+        Verify exact source anchors and broader core side effects, native merchant price
+        charging consistency, and lack of spillover to ordinary merchant NPCs.
+    - path: "sql/**/*.sql"
+      instructions: |
+        Review migration idempotency, data loss, template IDs, pricing, and
+        realm-wide unintended effects. Do not assume staging SQL is deployed.
+    - path: "conf/**/*"
+      instructions: |
+        Review safe default values, option name consistency, runtime reload behavior,
+        restricted services, and existing realm configuration compatibility.

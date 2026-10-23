@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+*.o
+*.log
+.env
+*.local
+conf/*.conf
