@@ -2,7 +2,7 @@ diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entiti
 index 138e7eab4..136adda82 100644
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
-@@ -2126,6 +2126,34 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid const& guid, uint32 npcflag
+@@ -2126,6 +2126,40 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid const& guid, uint32 npcflag
      if (!creature)
          return nullptr;
  
@@ -28,6 +28,12 @@ index 138e7eab4..136adda82 100644
 +             GetMap() && GetMap()->Instanceable()))
 +            return nullptr;
 +
++        // The Steward advertises a native mailbox flag. Its individual service
++        // toggle must also apply to direct mailbox packets, not only gossip.
++        if (brambletownEntry == 910101u && (npcflagmask & UNIT_NPC_FLAG_MAILBOX) &&
++            !sConfigMgr->GetOption<bool>("BrambleServices.Service.Mailbox", true))
++            return nullptr;
++
 +        // Providers 4A and 4H may only be used by their own faction.
 +        if ((brambletownEntry == 910104u && GetTeamId() != TEAM_ALLIANCE) ||
 +            (brambletownEntry == 910105u && GetTeamId() != TEAM_HORDE))
@@ -37,7 +43,7 @@ index 138e7eab4..136adda82 100644
      // Deathstate checks
      if (!IsAlive() && !(creature->GetCreatureTemplate()->type_flags & CREATURE_TYPE_FLAG_VISIBLE_TO_GHOSTS))
          return nullptr;
-@@ -11040,6 +11068,13 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
+@@ -11040,6 +11074,13 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
          // reputation discount
          price = uint32(std::floor(price * GetReputationPriceDiscount(creature)));
  
