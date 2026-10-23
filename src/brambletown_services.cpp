@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cstdint>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <utility>
 #include <unordered_map>
@@ -203,7 +204,8 @@ namespace
         }
         // Brambletown auctioneer entries are fixed because the core native
         // interaction guard protects exactly these reviewed template IDs.
-        if ((index == 2 && provider.entry != 910102u) ||
+        if ((index == 1 && provider.entry != 910101u) ||
+            (index == 2 && provider.entry != 910102u) ||
             (index == 3 && provider.entry != 910103u) ||
             (index == 4 && (provider.allianceEntry != 910104u || provider.hordeEntry != 910105u)) ||
             (index == 5 && provider.entry != 910106u))
@@ -296,39 +298,16 @@ namespace
         Player* player = session->GetPlayer();
         if (!CanSpawn(player, handler))
             return true;
-
-        std::lock_guard<std::mutex> lock(ActiveGroupsMutex);
-        auto const now = Clock::now();
-        uint32 const ownerKey = player->GetGUID().GetCounter();
-
-        // If an expired NPC survived its timer because of server lag,
-        // despawn it before permitting another group for the same player.
-        auto expiredOwned = ActiveGroups.find(ownerKey);
-        if (expiredOwned != ActiveGroups.end() && expiredOwned->second.expiresAt <= now)
+        if (!player->GetMap())
         {
-            DespawnOwned(player, expiredOwned->second);
-            ActiveGroups.erase(expiredOwned);
-        }
-
-        // Avoid retaining cooldown records for characters who never return.
-        PurgeExpired(now);
-
-        auto existing = ActiveGroups.find(ownerKey);
-        if (existing != ActiveGroups.end())
-        {
-            auto const remainingMs =
-                std::chrono::duration_cast<std::chrono::milliseconds>(existing->second.expiresAt - now).count();
-            uint32 const remainingSeconds = static_cast<uint32>((remainingMs + 999) / 1000);
-            handler->PSendSysMessage("{} seconds until services can be called.", remainingSeconds);
+            handler->SendSysMessage("Services cannot be summoned: map information is unavailable.");
             return true;
         }
-
         if (!ProviderEnabled(1))
         {
             handler->SendSysMessage("The Steward service is disabled.");
             return true;
         }
-
         Provider stewardProvider;
         if (!ReadProvider(1, stewardProvider))
         {
@@ -336,26 +315,78 @@ namespace
             return true;
         }
 
+        // Reserve the cooldown while holding the registry lock, then perform
+        // world operations without holding a global lock across core callbacks.
+        auto const now = Clock::now();
+        uint32 const ownerKey = player->GetGUID().GetCounter();
+        std::optional<ActiveGroup> expiredGroup;
+        uint32 cooldownSeconds = 0;
+        bool onCooldown = false;
         uint32 const duration = GetDurationSeconds();
-        ActiveGroup group;
-        group.expiresAt = now + std::chrono::seconds(duration);
-        group.mapId = player->GetMapId();
-        group.instanceId = player->GetMap()->GetInstanceId();
-        group.creatureGuids.reserve(5);
-
-        // The initial command summons only Provider 1. All optional providers
-        // are requested individually from the Steward's gossip menu.
-        Creature* steward = SpawnAt(player, player, stewardProvider, duration * 1000u);
-        if (!steward)
         {
+            std::lock_guard<std::mutex> lock(ActiveGroupsMutex);
+            auto expired = ActiveGroups.find(ownerKey);
+            if (expired != ActiveGroups.end() && expired->second.expiresAt <= now)
+            {
+                expiredGroup = std::move(expired->second);
+                ActiveGroups.erase(expired);
+            }
+            PurgeExpired(now);
+            auto existing = ActiveGroups.find(ownerKey);
+            if (existing != ActiveGroups.end())
+            {
+                auto const remainingMs =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(existing->second.expiresAt - now).count();
+                cooldownSeconds = static_cast<uint32>((remainingMs + 999) / 1000);
+                onCooldown = true;
+            }
+            else
+            {
+                ActiveGroup pending;
+                pending.expiresAt = now + std::chrono::seconds(duration);
+                pending.mapId = player->GetMapId();
+                pending.instanceId = player->GetMap()->GetInstanceId();
+                pending.creatureGuids.reserve(MaxProviders);
+                pending.requestedProviders.insert(1);
+                ActiveGroups.emplace(ownerKey, std::move(pending));
+            }
+        }
+        if (expiredGroup)
+            DespawnOwned(player, *expiredGroup);
+        if (onCooldown)
+        {
+            handler->PSendSysMessage("{} seconds until services can be called.", cooldownSeconds);
+            return true;
+        }
+
+        // The initial command summons only Provider 1. The reserved record
+        // blocks repeated commands while its world summon is in flight.
+        Creature* steward = SpawnAt(player, player, stewardProvider, duration * 1000u);
+        bool committed = false;
+        {
+            std::lock_guard<std::mutex> lock(ActiveGroupsMutex);
+            auto it = ActiveGroups.find(ownerKey);
+            if (it != ActiveGroups.end() && it->second.expiresAt == now + std::chrono::seconds(duration) &&
+                !it->second.stewardGuid && it->second.mapId == player->GetMapId() &&
+                it->second.instanceId == player->GetMap()->GetInstanceId())
+            {
+                if (steward)
+                {
+                    it->second.stewardGuid = steward->GetGUID();
+                    it->second.creatureGuids.push_back(it->second.stewardGuid);
+                    committed = true;
+                }
+                else
+                    ActiveGroups.erase(it); // Summon failed: no cooldown.
+            }
+        }
+        if (!committed)
+        {
+            if (steward)
+                steward->DespawnOrUnsummon();
             handler->SendSysMessage("The Steward could not be summoned. Contact a server administrator.");
             return true;
         }
-        group.stewardGuid = steward->GetGUID();
-        group.creatureGuids.push_back(group.stewardGuid);
-        group.requestedProviders.insert(1);
-
-        ActiveGroups[ownerKey] = std::move(group);
         handler->PSendSysMessage("Steward summoned for {}. Ask the Steward to call other providers.", DurationLabel(duration));
         return true;
     }
@@ -396,18 +427,6 @@ namespace BrambletownServices
              player->GetMap() && player->GetMap()->Instanceable()))
             return false;
 
-        std::lock_guard<std::mutex> lock(ActiveGroupsMutex);
-        ActiveGroup* group = FindCurrentGroup(player, steward);
-        if (!group)
-        {
-            handler.SendNotification("Only the player who called this Steward can summon providers.");
-            return false;
-        }
-        if (group->requestedProviders.contains(index))
-        {
-            handler.SendNotification("This provider was already summoned by your Steward.");
-            return false;
-        }
         Provider provider;
         if (!ReadProvider(index, provider))
         {
@@ -415,20 +434,56 @@ namespace BrambletownServices
             return false;
         }
 
-        auto const remaining = std::chrono::duration_cast<std::chrono::milliseconds>(group->expiresAt - Clock::now()).count();
-        if (remaining <= 0)
+        uint32 remainingMs = 0;
+        ObjectGuid stewardGuid;
         {
-            handler.SendNotification("This Steward's service period has expired.");
-            return false;
+            std::lock_guard<std::mutex> lock(ActiveGroupsMutex);
+            ActiveGroup* group = FindCurrentGroup(player, steward);
+            if (!group)
+            {
+                handler.SendNotification("Only the player who called this Steward can summon providers.");
+                return false;
+            }
+            if (group->requestedProviders.contains(index))
+            {
+                handler.SendNotification("This provider was already summoned by your Steward.");
+                return false;
+            }
+            auto const remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
+                group->expiresAt - Clock::now()).count();
+            if (remaining <= 0)
+            {
+                handler.SendNotification("This Steward's service period has expired.");
+                return false;
+            }
+            remainingMs = static_cast<uint32>(remaining);
+            stewardGuid = group->stewardGuid;
+            group->requestedProviders.insert(index); // Reserve once, before unlocking.
         }
-        Creature* summoned = SpawnAt(player, steward, provider, static_cast<uint32>(remaining));
-        if (!summoned)
+
+        Creature* summoned = SpawnAt(player, steward, provider, remainingMs);
+        bool committed = false;
         {
+            std::lock_guard<std::mutex> lock(ActiveGroupsMutex);
+            ActiveGroup* group = FindCurrentGroup(player, steward);
+            if (group && group->stewardGuid == stewardGuid)
+            {
+                if (summoned)
+                {
+                    group->creatureGuids.push_back(summoned->GetGUID());
+                    committed = true;
+                }
+                else
+                    group->requestedProviders.erase(index); // Failed summon can be retried.
+            }
+        }
+        if (!committed)
+        {
+            if (summoned)
+                summoned->DespawnOrUnsummon();
             handler.SendNotification("Provider summon failed. Contact a server administrator.");
             return false;
         }
-        group->creatureGuids.push_back(summoned->GetGUID());
-        group->requestedProviders.insert(index);
         handler.PSendSysMessage("Provider {} summoned for the remainder of the Steward's service period.", index);
         return true;
     }
@@ -459,25 +514,30 @@ public:
 
     void OnPlayerBeforeLogout(Player* player) override
     {
-        if (!player)
-            return;
-        std::lock_guard<std::mutex> lock(ActiveGroupsMutex);
-        auto it = ActiveGroups.find(player->GetGUID().GetCounter());
-        if (it != ActiveGroups.end())
-            DespawnOwned(player, it->second);
+        if (player)
+            DespawnPlayerGroup(player);
     }
 
     bool OnPlayerBeforeTeleport(Player* player, uint32 /*mapid*/, float /*x*/, float /*y*/,
         float /*z*/, float /*orientation*/, uint32 /*options*/, Unit* /*target*/) override
     {
         if (player)
+            DespawnPlayerGroup(player);
+        return true;
+    }
+
+private:
+    static void DespawnPlayerGroup(Player* player)
+    {
+        std::optional<ActiveGroup> group;
         {
             std::lock_guard<std::mutex> lock(ActiveGroupsMutex);
             auto it = ActiveGroups.find(player->GetGUID().GetCounter());
             if (it != ActiveGroups.end())
-                DespawnOwned(player, it->second);
+                group = it->second; // Cooldown survives logout / teleport as before.
         }
-        return true;
+        if (group)
+            DespawnOwned(player, *group);
     }
 };
 

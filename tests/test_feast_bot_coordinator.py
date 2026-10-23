@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """Assert bounded, opt-in, module-only Playerbots feast coordination."""
 from pathlib import Path
+import os
 r=Path(__file__).resolve().parents[1]
 s=(r/'src/brambletown_npc_services.cpp').read_text()
 h=(r/'src/brambletown_npc_services.h').read_text()
 c=(r/'conf/brambletown_services.conf.dist').read_text()
-playerbots=Path('/root/brambletown-upgrade-work/modules/mod-playerbots/src')
-playerbot_impl=(playerbots/'Ai/Base/Actions/UseItemAction.cpp').read_text()
-playerbot_manager=(playerbots/'Bot/PlayerbotMgr.h').read_text()
-ai_header=(playerbots/'Bot/PlayerbotAI.h').read_text()
+playerbots_src=os.environ.get('PLAYERBOTS_SRC')
+assert playerbots_src != "", "PLAYERBOTS_SRC must be a non-empty directory when configured"
+if playerbots_src is not None:
+    playerbots=Path(playerbots_src)
+    playerbot_impl=(playerbots/'Ai/Base/Actions/UseItemAction.cpp').read_text()
+    playerbot_manager=(playerbots/'Bot/PlayerbotMgr.h').read_text()
+    ai_header=(playerbots/'Bot/PlayerbotAI.h').read_text()
 assert 'CreatureAI* GetAI(Creature* creature) const override;' in h
 assert 'new BrambletownStewardAI(creature)' in s
 assert 'struct BrambletownStewardAI : ScriptedAI' in s
@@ -17,10 +21,13 @@ assert 'OfferFeastToNearbyBots(feast, player)' in s
 assert 'GO_SUMMON_TIMED_DESPAWN' in s
 assert 'feast->GetEntry() != FishFeastEntry' in s
 assert 'sPlayerbotsMgr.GetPlayerbotAI(bot)' in s
-assert 'PlayerbotAI* GetPlayerbotAI(Player* player)' in playerbot_manager
-assert 'virtual bool DoSpecificAction(' in ai_header
-assert 'bool UseItemAction::UseGameObject(ObjectGuid guid)' in playerbot_impl
-assert 'HandleGameObjectUseOpcode(use)' in playerbot_impl
+if playerbots_src is not None:
+    assert 'PlayerbotAI* GetPlayerbotAI(Player* player)' in playerbot_manager
+    assert 'virtual bool DoSpecificAction(' in ai_header
+    assert 'bool UseItemAction::UseGameObject(ObjectGuid guid)' in playerbot_impl
+    assert 'HandleGameObjectUseOpcode(use)' in playerbot_impl
+else:
+    print('SKIP: external Playerbots API checks (set PLAYERBOTS_SRC)')
 assert 'GameObject* feast = me->GetMap() ? me->GetMap()->GetGameObject(feastGuid)' in s
 assert 'ObjectAccessor::GetPlayer(*me, pending.guid)' in s
 assert 'for (auto const& ref : me->GetMap()->GetPlayers())' in s
@@ -30,7 +37,10 @@ assert 'feast->IsWithinDistInMap(bot, feast->GetInteractionDistance())' in s
 assert 'ai->DoSpecificAction("use", Event("use", link), true)' in s
 assert 'ai->DoSpecificAction("go", Event("go", link), true)' in s
 assert 'ai->GetMaster()' in s # no random/unmanaged bot movement orders
-assert 'pending.moveRequested = true' in s and 'pending.useRequested = true' in s
+assert 'pending.moveRequested = ai->DoSpecificAction("go", Event("go", link), true)' in s and 'pending.useRequested = true' in s
+assert 'if (pending.moveRetryDelayMs > 1000)' in s
+assert 'pending.moveRetryDelayMs -= 1000;' in s
+assert s.index('pending.moveRetryDelayMs = 0;', s.index('if (pending.moveRetryDelayMs > 1000)')) < s.index('++pending.moveAttempts;', s.index('if (pending.moveRetryDelayMs > 1000)'))
 assert 'windowMs = 28000' in s and 'tickMs = 1000' in s
 for setting in ('AutoBots','BotRadius','BotMax'):
     field=f'BrambleServices.Service.FishFeast.{setting}'

@@ -2,7 +2,7 @@
 -- Original class/level item requirements and normal BuyPrice apply; native merchant buy/sell/buyback.
 -- Pet food is selected from ALL SIX food types supported by actual WotLK item_template data.
 -- One vendor inventory, limited to 150 WotLK client slots. Repair NPC flag is also enabled.
--- Preflight ID collision; do not overwrite an existing entry.
+-- Preflight ID collision; do not overwrite an existing entry. The capacity CHECK below aborts oversized catalogs before npc_vendor writes.
 SELECT entry,name,subname,npcflag,ScriptName FROM creature_template WHERE entry=910106;
 SELECT CreatureID,CreatureDisplayID FROM creature_template_model WHERE CreatureID=910106;
 SELECT entry,slot,item FROM npc_vendor WHERE entry=910106 ORDER BY slot;
@@ -19,8 +19,9 @@ AND NOT EXISTS(SELECT 1 FROM creature_template_model WHERE CreatureID=910106 AND
 
 -- Native vendor catalog; no other NPC and no item_template records are modified.
 -- Clear the catalog before applying if entry 910106 is already occupied by another vendor.
-INSERT INTO npc_vendor(entry,slot,item,maxcount,incrtime,ExtendedCost,VerifiedBuild)
-SELECT stock.entry,stock.slot,stock.item,0,0,0,12340
+DROP TEMPORARY TABLE IF EXISTS brambletown_provider5_catalog;
+CREATE TEMPORARY TABLE brambletown_provider5_catalog AS
+SELECT stock.entry,stock.slot,stock.item
 FROM (
   -- Food and water - drinks (level 1-75)
   SELECT 910106 AS entry, 0 AS slot, 159 AS item -- Refreshing Spring Water
@@ -146,9 +147,35 @@ FROM (
   UNION ALL SELECT 910106,109,4496 -- Small Brown Pouch
   UNION ALL SELECT 910106,110,4498 -- Brown Leather Satchel
   UNION ALL SELECT 910106,111,4497 -- Heavy Brown Bag
-) AS stock
+) AS stock;
+
+-- Preflight: include ALL existing rows (including other ExtendedCost values),
+-- and count only genuinely new rows from this 112-item catalog. MySQL 8+ CHECK
+-- fails the script BEFORE npc_vendor writes when the projected total exceeds
+-- the hard-coded WotLK client limit of 150 inventory entries.
+DROP TEMPORARY TABLE IF EXISTS brambletown_provider5_capacity_check;
+CREATE TEMPORARY TABLE brambletown_provider5_capacity_check (
+    projected_count INT NOT NULL,
+    CONSTRAINT brambletown_provider5_max_150 CHECK (projected_count <= 150)
+);
+INSERT INTO brambletown_provider5_capacity_check(projected_count)
+SELECT (SELECT COUNT(*) FROM npc_vendor WHERE entry=910106)
+     + (SELECT COUNT(*) FROM brambletown_provider5_catalog AS proposed
+        WHERE NOT EXISTS (
+            SELECT 1 FROM npc_vendor AS existing
+            WHERE existing.entry=proposed.entry AND existing.item=proposed.item
+              AND existing.ExtendedCost=0
+        ));
+-- Even with checks ignored or a SQL client set to continue after errors,
+-- the INSERT cannot add any items when the projected count exceeds 150.
+INSERT INTO npc_vendor(entry,slot,item,maxcount,incrtime,ExtendedCost,VerifiedBuild)
+SELECT stock.entry,stock.slot,stock.item,0,0,0,12340
+FROM brambletown_provider5_catalog AS stock
 WHERE EXISTS(SELECT 1 FROM creature_template WHERE entry=910106 AND name='Brambletown Provisioner' AND npcflag=4224)
-AND NOT EXISTS(SELECT 1 FROM npc_vendor WHERE entry=stock.entry AND item=stock.item AND ExtendedCost=0);
+AND NOT EXISTS(SELECT 1 FROM npc_vendor WHERE entry=stock.entry AND item=stock.item AND ExtendedCost=0)
+AND (SELECT MAX(projected_count) FROM brambletown_provider5_capacity_check) <= 150;
+DROP TEMPORARY TABLE brambletown_provider5_capacity_check;
+DROP TEMPORARY TABLE brambletown_provider5_catalog;
 
 -- Postflight: all items must be present and under the maximum vendor size.
 SELECT entry,name,subname,faction,npcflag FROM creature_template WHERE entry=910106;

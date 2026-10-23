@@ -1,27 +1,87 @@
 #!/usr/bin/env python3
-"""Scribe-only 1g cap and native provider-access regression; read-only."""
+"""Portable native Scribe patch/price regression; no running-server writes."""
 from pathlib import Path
-r=Path(__file__).resolve().parents[1]
-staged=Path('/root/brambletown-upgrade-work/core')
-live=Path('/root/azerothcore-wotlk')
-p1='src/server/game/Entities/Player/Player.cpp'
-p2='src/server/game/Handlers/ItemHandler.cpp'
-buy=(staged/p1).read_text()
-ui=(staged/p2).read_text()
-assert buy.count('creature->GetEntry() == 910103 && pProto->Class == ITEM_CLASS_GLYPH')==1
-assert 'price > 10000u * count' in buy and 'price = 10000u * count;' in buy
-assert ui.count('vendor->GetEntry() == 910103 && itemTemplate->Class == ITEM_CLASS_GLYPH && price > 10000')==1
-assert 'price = 10000;' in ui
-assert 'creature->GetEntry() == 910103 && pProto->Class == ITEM_CLASS_GLYPH' not in (live/p1).read_text()
-assert 'vendor->GetEntry() == 910103 && itemTemplate->Class == ITEM_CLASS_GLYPH' not in (live/p2).read_text()
-patch=(r/'patches/brambletown-npc-access-and-scribe-price-cap.patch').read_text()
-assert 'diff --git a/'+p1 in patch and 'diff --git a/'+p2 in patch
-assert 'Brambletown Scribe' in patch and 'Brambletown temporary NPC providers' in patch
-sql=(r/'sql/GM_STAGING_scribe_class_glyph_vendors.sql').read_text()
+import os
+import re
+
+root = Path(__file__).resolve().parents[1]
+patch = (root/'patches/brambletown-npc-access-and-scribe-price-cap.patch').read_text()
+player = 'src/server/game/Entities/Player/Player.cpp'
+handler = 'src/server/game/Handlers/ItemHandler.cpp'
+assert f'diff --git a/{player}' in patch and f'diff --git a/{handler}' in patch
+assert 'Brambletown Scribe' in patch and 'Brambletown NPC providers (1-5)' in patch
+assert 'creature->GetEntry() == 910103 && pProto->Class == ITEM_CLASS_GLYPH' in patch
+assert 'price = std::min<uint64>(price, uint64(10000u) * count);' in patch
+assert 'vendor->GetEntry() == 910103 && itemTemplate->Class == ITEM_CLASS_GLYPH && price > 10000' in patch
+assert 'price = 10000;' in patch
+sql = (root/'sql/GM_STAGING_scribe_class_glyph_vendors.sql').read_text()
 assert 'UPDATE item_template' not in sql and 'DELETE FROM item_template' not in sql
 
-def glyph_price(base_copper, quantity=1, discount=1):
-    return min(int(base_copper*quantity*discount), 10000*quantity)
-for orig, qty, discount, expected in ((0,1,1,0),(400,1,1,400),(400,3,1,1200),(9000,1,1,9000),(10000,1,1,10000),(1000000,1,1,10000),(1000000,3,1,30000),(10000,1,0.9,9000)):
-    assert glyph_price(orig,qty,discount)==expected
-print('PASS: glyph prices <=1g; lower prices preserved, custom guard staged, live source untouched')
+# Native scoping/quantity expressions are checked against the proposed patch
+# by test_native_patch_contract.py; behavior still needs in-game verification.
+
+# Staged core checks: verify actual custom hooks, not ordinary AzerothCore functions.
+staged_root = os.environ.get('BRAMBLETOWN_CORE_ROOT')
+assert staged_root != "", "BRAMBLETOWN_CORE_ROOT must be a non-empty directory when configured"
+if staged_root is not None:
+    base = Path(staged_root)
+    player_file = base/player
+    handler_file = base/handler
+    assert player_file.is_file(), f'Staged Player.cpp missing: {player_file}'
+    assert handler_file.is_file(), f'Staged ItemHandler.cpp missing: {handler_file}'
+    staged_player = player_file.read_text()
+    staged_handler = handler_file.read_text()
+    assert 'brambletownEntry' in staged_player, 'Staged Brambletown entry guard missing'
+    assert 'creature->GetEntry() == 910103 && pProto->Class == ITEM_CLASS_GLYPH' in staged_player, (
+        'Staged Scribe purchase cap missing'
+    )
+    assert 'vendor->GetEntry() == 910103 && itemTemplate->Class == ITEM_CLASS_GLYPH' in staged_handler, (
+        'Staged Scribe listing cap missing'
+    )
+    print('PASS: staged core contains Scribe-specific hooks')
+else:
+    print('SKIP: staged core source checks (set BRAMBLETOWN_CORE_ROOT)')
+
+strict_value = os.environ.get('BRAMBLETOWN_REQUIRE_NEW_GUARD', '0')
+assert strict_value in ('0', '1'), 'BRAMBLETOWN_REQUIRE_NEW_GUARD must be 0 or 1'
+live_root = os.environ.get('AZEROTHCORE_LIVE_ROOT')
+assert live_root != "", "AZEROTHCORE_LIVE_ROOT must be a non-empty directory when configured"
+if strict_value == '1':
+    assert live_root is not None or staged_root is not None, (
+        'Strict native patch check needs AZEROTHCORE_LIVE_ROOT or BRAMBLETOWN_CORE_ROOT'
+    )
+    checked_root = Path(live_root if live_root is not None else staged_root)
+    player_file = checked_root/player
+    handler_file = checked_root/handler
+    assert player_file.is_file(), f'Strict Player.cpp missing: {player_file}'
+    assert handler_file.is_file(), f'Strict ItemHandler.cpp missing: {handler_file}'
+    installed_player = player_file.read_text()
+    installed_handler = handler_file.read_text()
+    assert 'brambletownEntry >= 910101u && brambletownEntry <= 910106u' in installed_player, (
+        'Native Steward mailbox guard not installed'
+    )
+    assert 'price = std::min<uint64>(price, uint64(10000u) * count);' in installed_player, (
+        'Overflow-safe Scribe purchase cap not installed'
+    )
+    # The condition alone is insufficient: require the price assignment
+    # immediately under the Scribe/glyph-specific native branch.
+    listing_cap = (
+        r'if\s*\(\s*vendor->GetEntry\(\)\s*==\s*910103\s*&&\s*'
+        r'itemTemplate->Class\s*==\s*ITEM_CLASS_GLYPH\s*&&\s*'
+        r'price\s*>\s*10000\s*\)\s*price\s*=\s*10000\s*;'
+    )
+    assert re.search(listing_cap, installed_handler), (
+        'Installed Scribe listing branch does not cap glyph prices'
+    )
+    print(f'PASS: strict native Scribe and Steward changes present in {checked_root}')
+elif live_root is not None:
+    # Production is not required to have the proposed patch before deployment.
+    installed_player = Path(live_root)/player
+    installed_handler = Path(live_root)/handler
+    assert installed_player.is_file(), f'Installed Player.cpp missing: {installed_player}'
+    assert installed_handler.is_file(), f'Installed ItemHandler.cpp missing: {installed_handler}'
+    print('SKIP: installed native patch not required before deployment (set BRAMBLETOWN_REQUIRE_NEW_GUARD=1)')
+else:
+    print('SKIP: installed native patch verification (predeployment mode)')
+
+print('PASS: proposed Scribe price-cap contracts and SQL scope; in-game purchase untested')

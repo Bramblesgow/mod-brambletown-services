@@ -88,7 +88,7 @@ configuration, so both shared and separate realm modes work.
 |---|---|
 | 1–136 | Upstream attribution, complete includes, rotating NPC speech, single-feast registry and independently checked service toggles |
 | 137–184 | AI state records only GUIDs and action state; reports **confirmed Well Fed** rather than treating a click as success |
-| 185–225 | Scans nearby eligible bots once; radius/count clamped; avoids combat, mounts, flights and already-buffed bots |
+| 185–225 | Scans nearby eligible bots once; radius/count clamped; avoids combat, mounts and flights; invites already-buffed bots to refresh Well Fed |
 | 226–367 | Bounded 28s world-tick state machine; interact/move through existing Playerbots APIs, sit and wait 10s, fallback normal food aura, cancel on combat; explicit state completion to avoid accidental fallthrough |
 | 368–431 | Steward gossip registration, exact NPC identity, clear menu order, access checks on open |
 | 432–527 | Protected summon submenu, Flask variants and forged-action rejection; sender and owner checks |
@@ -111,8 +111,10 @@ applies the normal eating aura (57398). Keeping this behavior retains the real
 | 459–759 | Each category offers only its reviewed actions. Leveling head/shoulder/leg and hunter ranged scopes preserved. 2H/shield/offhand invalid-item branches have one consistent outcome |
 | 760–862 | Equipment owner/worn-slot/type validation, specialization and DBC restrictions, permanent bonus reapplication, item-name flavor text and visual confirmation |
 
-**Compatibility:** The original database script name `npc_enchantment` is
-unchanged although the C++ class is now `BrambletownEnchanter`. Ring enchanting
+**Compatibility:** `npc_enchantment` was the historical script name. As of
+the October 18 CodeRabbit fixes, Brambletown Enchanter template `910102`
+registers as `brambletown_enchanter`; the scoped staging SQL migrates existing
+Brambletown records without changing unrelated Enchanters. Ring enchanting
 still applies to each equipped ring separately. The original cosmetic messages
 are preserved, including the corrected `{}` equipment-name substitution.
 
@@ -193,6 +195,8 @@ to a controlled GM test only after the final build and validation succeed.
 
 ## October 16 follow-up: Fish Feast behavior after cleanup
 
+**Historical investigation, superseded by the October 16 repeat-feast update.**
+
 A regression review compared the exact previously in-game-confirmed bot
 coordinator with the current build. Removing the loop's `allDone` flag had
 also removed an unconditional `continue` from both the `foodStarted` and
@@ -202,13 +206,13 @@ comments), without changing the coordinator's existing GUID, distance,
 combat or timing rules. A targeted regression test now guards both branches.
 
 The live character database also recorded Well Fed (`57399`) on five currently
-online characters during investigation. Because the coordinator deliberately
-skips already-Well-Fed characters, an otherwise successful feast summon
+online characters during investigation. At that time the coordinator
+skipped already-Well-Fed characters, an otherwise successful feast summon
 can result in no bot eating until the buff expires. Added a useful player
 message when zero nearby eligible unbuffed bots can be invited. The database
 values are saved aura records, not guaranteed snapshots of live aura state.
 
-**Worktree fix only:** requires a new build and explicit deployment approval.
+**Superseded behavior:** the October 16 update below invites already-buffed bots on every feast drop. This earlier observation is retained for change history.
 
 ## October 16 — explicit repeat-feast requirement
 

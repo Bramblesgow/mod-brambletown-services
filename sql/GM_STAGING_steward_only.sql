@@ -19,12 +19,20 @@ INSERT INTO creature_template
  HealthModifier, ManaModifier, ArmorModifier, RegenHealth, flags_extra, ScriptName)
 SELECT
 910101, 'Brambletown Steward', 'Character Services', NULL, 0, 80, 80, 2,
-35, 1, 1, 0, 2000, 2000, 2,
+35, 67108865, 1, 0, 2000, 2000, 2,
 0, 2048, 7, 0, 0, 0, 0,
 '', 0, 1, 0, 0,
 50, 50, 1, 1, 0, 'brambletown_npc_services'
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM creature_template WHERE entry=910101);
+
+-- Existing Brambletown Stewards also need the MAILBOX bit for regular players.
+-- This scoped/idempotent migration preserves other flags and does not modify
+-- unrelated NPCs or generic mailbox access rules.
+UPDATE creature_template
+SET npcflag = npcflag | 67108864 -- UNIT_NPC_FLAG_MAILBOX (0x04000000)
+WHERE entry = 910101 AND name = 'Brambletown Steward'
+  AND ScriptName = 'brambletown_npc_services';
 
 -- Add the Steward model only if OUR NPC template is present and model absent.
 INSERT INTO creature_template_model
@@ -38,7 +46,7 @@ WHERE EXISTS
 AND NOT EXISTS
     (SELECT 1 FROM creature_template_model WHERE CreatureID=910101 AND Idx=0);
 
--- POST-FLIGHT: verify exact desired name, ScriptName, and display ID.
+-- POST-FLIGHT: verify exact name, script, display ID, and mailbox flag (npcflag & 67108864).
 SELECT entry, name, subname, ScriptName FROM creature_template WHERE entry = 910101;
 SELECT CreatureID, Idx, CreatureDisplayID
 FROM creature_template_model WHERE CreatureID=910101;

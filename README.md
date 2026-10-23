@@ -103,14 +103,48 @@ preserved in its header.
 
 ## Development validation
 
-In the isolated development worktree, use:
+From the **reviewed checkout**, run the portable source checks:
 
 ```bash
-cd /root/brambletown-services-work/mod-brambletown-services
+set -euo pipefail
 for test in tests/test_*.py; do python3 "$test"; done
-python3 tests/check_cpp_syntax.py
-cmake --build /root/brambletown-upgrade-work/build-production --target worldserver -j 2
 ```
+
+For optional **syntax-only** C++ verification using an existing compatible
+AzerothCore compilation database (no build or link):
+
+```bash
+AZEROTHCORE_COMPILE_COMMANDS=/path/to/compile_commands.json python3 tests/check_cpp_syntax.py
+```
+
+Do not compile, link or install the running realm executable during review.
+
+Optional installed-source checks use PLAYERBOTS_SRC (Playerbots src),
+SPELL_ICON_DBC (SpellIcon.dbc), SPELL_ENCHANT_DBC
+(SpellItemEnchantment.dbc), BRAMBLETOWN_CORE_ROOT (staged/core source root),
+and AZEROTHCORE_LIVE_ROOT (installed live AzerothCore root with DBC files).
+Without these variables, module-local regression checks run and external
+integration checks are clearly skipped. Explicitly configured invalid paths
+fail validation instead of silently passing.
+
+Before deployment, BRAMBLETOWN_CORE_ROOT may point to the existing staged
+source (which can still use native guard 910102). AZEROTHCORE_LIVE_ROOT
+points to the installed source, which is not required to contain the
+proposed changes until deployment.
+
+After an approved deployment, use strict source checks:
+BRAMBLETOWN_REQUIRE_NEW_GUARD=1 AZEROTHCORE_LIVE_ROOT=/path/to/core python3 tests/test_scribe_price_cap.py
+BRAMBLETOWN_REQUIRE_NEW_GUARD=1 AZEROTHCORE_LIVE_ROOT=/path/to/core python3 tests/test_providers_4_5.py
+
+Strict mode checks the target source for the new 910101 guard and Scribe
+caps. When both staged and installed roots are set, installed source
+takes precedence for strict verification. These checks do not substitute
+for a linked build or in-game verification.
+The new portable checks also assert mailbox registration, script-name
+migration, vendor inventory capacity protection and Engineering visibility.
+The Steward mailbox NPC flag enables direct mailbox packets: the native core
+patch also enforces `BrambleServices.Service.Mailbox` when handling those
+packets, in addition to the normal GM-only and provider-level restrictions.
 
 The **151-entry golden fixture** at `tests/enchant_action_baseline.json` is a
 regression baseline for enchant gossip actions, DBC IDs and equipment slots.
@@ -119,9 +153,24 @@ auction faction behavior, all five provider configurations and Fish Feast
 coordination. See `docs/CODE_REVIEW_2026-10-15.md` for review findings and
 remaining runtime-test limits.
 
-This command builds the isolated development binary only; it does **not**
-replace `/root/azerothcore-wotlk/env/dist/bin/worldserver`, restart the server,
-or apply SQL. Deploy only after approval, with backup and online-player warning.
+The above source checks are not runtime tests. The optional C++ validators
+compile exactly this review checkout to temporary objects, and the native
+validator applies the patch to disposable unpatched AzerothCore sources.
+They never link, install, restart, or apply SQL.
+
+For nonproduction native checks on the authorized development machine,
+set `AZEROTHCORE_COMPILE_COMMANDS` for syntax validation and
+`BRAMBLETOWN_BUILD_DIR` for object and patch validation. Run:
+
+```bash
+AZEROTHCORE_COMPILE_COMMANDS=/path/to/compile_commands.json python3 tests/check_cpp_syntax.py
+BRAMBLETOWN_BUILD_DIR=/path/to/build python3 tests/build_isolated_objects.py
+BRAMBLETOWN_BUILD_DIR=/path/to/build BRAMBLETOWN_NATIVE_BASE_ROOT=/path/to/unpatched/core python3 tests/check_scribe_price_patch_cpp.py
+```
+
+Native GitHub validation is opt-in and runs only on trusted pushes to
+protected `main` with an authorized self-hosted runner. Skipped native CI
+is not build verification. See `docs/DEPLOYMENT_VALIDATION.md`.
 
 ### Rejected-command feedback (October 15, 2026, staged)
 

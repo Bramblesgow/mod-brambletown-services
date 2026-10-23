@@ -14,11 +14,15 @@ assert len(settings) == len(re.findall(r"^BrambleServices\.[A-Za-z0-9_.]+\s*=", 
 assert "BrambleServices.DurationSeconds" in settings
 assert "BrambleServices.CooldownSeconds" not in settings
 assert "BrambleServices.Access.GMOnly" in settings
-assert "BrambleServices.Access.GMOnly = 1" in config
+def active_value(key):
+    values = re.findall(rf"^{re.escape(key)}\s*=\s*([^\s#;]+)", config, re.M)
+    assert len(values) == 1, (key, values)
+    return values[0]
+assert active_value("BrambleServices.Access.GMOnly") == "1"
 assert 'session->GetSecurity() < SEC_GAMEMASTER' in coordinator
 assert 'player->GetSession()->GetSecurity() < SEC_GAMEMASTER' in services
 assert 'Services are currently restricted to Game Masters.' in coordinator
-assert "BrambleServices.Provider.2.Enable = 0" in config
+assert active_value("BrambleServices.Provider.2.Enable") == "0"
 assert '"DBCStores.h"' in coordinator
 assert "sCreatureDisplayInfoStore.LookupEntry(provider.displayId)" in coordinator
 assert "creature->SetDisplayId(provider.displayId)" in coordinator
@@ -89,7 +93,9 @@ for provider in ("Steward", "Enchanter", "Scribe", "Auctioneer", "General Goods"
 assert ".reload config" in maintainer
 assert "maximum 5" in maintainer
 assert "UPSTREAM_ENCHANTER_LICENSE.md" in maintainer
-assert "development binary" in maintainer
+assert "syntax-only" in maintainer
+assert "AZEROTHCORE_COMPILE_COMMANDS=/path/to/compile_commands.json python3 tests/check_cpp_syntax.py" in maintainer
+assert "temporary objects" in maintainer
 
 print("PASS: static configuration/command/lifecycle invariants")
 print("NOTE: no C++ compilation, linked API checks, database tests, or gameplay tests performed")
@@ -97,7 +103,7 @@ print("NOTE: no C++ compilation, linked API checks, database tests, or gameplay 
 # Steward-only spawning and owner-gated, on-demand provider summons.
 assert 'for (Provider const& provider : providers)' not in coordinator
 assert 'SpawnAt(player, player, stewardProvider, duration * 1000u)' in coordinator
-assert 'SpawnAt(player, steward, provider, static_cast<uint32>(remaining))' in coordinator
+assert 'SpawnAt(player, steward, provider, remainingMs)' in coordinator
 assert 'it->second.stewardGuid != steward->GetGUID()' in coordinator
 assert 'group->requestedProviders.contains(index)' in coordinator
 assert 'group->expiresAt - Clock::now()' in coordinator

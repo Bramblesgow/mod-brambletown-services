@@ -390,7 +390,7 @@ static bool CanEnchant(Player* player)
 class BrambletownEnchanter : public CreatureScript
 {
 public:
-    BrambletownEnchanter() : CreatureScript("npc_enchantment") { }
+    BrambletownEnchanter() : CreatureScript("brambletown_enchanter") { }
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
@@ -631,7 +631,7 @@ public:
             return true;
 
         case 9: //Enchant Gloves
-            if (player->HasSkill(SKILL_ENGINEERING) && player->GetSkillValue(SKILL_ENGINEERING) == 400)
+            if (player->HasSkill(SKILL_ENGINEERING) && player->GetSkillValue(SKILL_ENGINEERING) >= 400)
             {
                 AddEnchantChoice(player, "Hyperspeed Accelerators (+Haste use effect)", 200);
             }
