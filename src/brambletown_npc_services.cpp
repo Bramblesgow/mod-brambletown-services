@@ -429,44 +429,44 @@ bool BrambletownNpcServices::OnGossipHello(Player* player, Creature* creature)
          BrambletownServices::IsProviderEnabled(3) ||
          BrambletownServices::IsProviderEnabled(4) ||
          BrambletownServices::IsProviderEnabled(5)))
-        AddGossipItemFor(player, 10, "|TInterface/Icons/Spell_Holy_SummonChampion:32:32:-14|t Call another service provider...", GOSSIP_SENDER_MAIN, 2000);
+        AddGossipItemFor(player, 10, "|TInterface/Icons/Spell_Holy_SummonChampion:18:18:-12|t Call another service provider...", GOSSIP_SENDER_MAIN, 2000);
 
     // Restore Health and Mana
     if (ServiceEnabled(1))
-        AddGossipItemFor(player, 10, "|TInterface\\icons\\Spell_Nature_Regenerate:32:32:-14|t Restore HP and MP", GOSSIP_SENDER_MAIN, 1);
+        AddGossipItemFor(player, 10, "|TInterface\\icons\\Spell_Nature_Regenerate:18:18:-12|t Restore HP and MP", GOSSIP_SENDER_MAIN, 1);
     // Reset Instances
     if (ServiceEnabled(2))
-        AddGossipItemFor(player, 10, "|TInterface\\icons\\Achievement_BG_winAB_underXminutes:32:32:-14|t Reset Instances", GOSSIP_SENDER_MAIN, 2);
+        AddGossipItemFor(player, 10, "|TInterface\\icons\\Achievement_BG_winAB_underXminutes:18:18:-12|t Reset Instances", GOSSIP_SENDER_MAIN, 2);
     // Reset Cooldowns
     if (ServiceEnabled(3))
-        AddGossipItemFor(player, 10, "|TInterface\\icons\\SPELL_HOLY_BORROWEDTIME:32:32:-14|t Reset Cooldowns", GOSSIP_SENDER_MAIN, 3);
+        AddGossipItemFor(player, 10, "|TInterface\\icons\\SPELL_HOLY_BORROWEDTIME:18:18:-12|t Reset Cooldowns", GOSSIP_SENDER_MAIN, 3);
     // Leave Combat
     if (ServiceEnabled(4))
-        AddGossipItemFor(player, 10, "|TInterface\\icons\\Achievement_BG_AB_defendflags:32:32:-14|t Reset Combat", GOSSIP_SENDER_MAIN, 4);
+        AddGossipItemFor(player, 10, "|TInterface\\icons\\Achievement_BG_AB_defendflags:18:18:-12|t Reset Combat", GOSSIP_SENDER_MAIN, 4);
     // Remove Sickness
     if (ServiceEnabled(5))
-        AddGossipItemFor(player, 10, "|TInterface\\icons\\Spell_Shadow_DeathScream:32:32:-14|t Remove Sickness", GOSSIP_SENDER_MAIN, 5);
+        AddGossipItemFor(player, 10, "|TInterface\\icons\\Spell_Shadow_DeathScream:18:18:-12|t Remove Sickness", GOSSIP_SENDER_MAIN, 5);
     // Repair Items
     if (ServiceEnabled(6))
-        AddGossipItemFor(player, 10, "|TInterface\\icons\\INV_Hammer_24:32:32:-14|t Repair Items", GOSSIP_SENDER_MAIN, 6);
+        AddGossipItemFor(player, 10, "|TInterface\\icons\\INV_Hammer_24:18:18:-12|t Repair Items", GOSSIP_SENDER_MAIN, 6);
     // Reset Talents
     if (ServiceEnabled(7))
-        AddGossipItemFor(player, 10, "|TInterface\\icons\\Achievement_WorldEvent_Lunar:32:32:-14|t Reset Talents", GOSSIP_SENDER_MAIN, 7);
+        AddGossipItemFor(player, 10, "|TInterface\\icons\\Achievement_WorldEvent_Lunar:18:18:-12|t Reset Talents", GOSSIP_SENDER_MAIN, 7);
     // Open Bank
     if (ServiceEnabled(8))
-        AddGossipItemFor(player, 10, "|TInterface/Icons/INV_Misc_Bag_07:32:32:-14|t Bank", GOSSIP_SENDER_MAIN, 8);
+        AddGossipItemFor(player, 10, "|TInterface/Icons/INV_Misc_Bag_07:18:18:-12|t Bank", GOSSIP_SENDER_MAIN, 8);
     // Open Mailbox
     if (ServiceEnabled(9))
-        AddGossipItemFor(player, 10, "|TInterface/Icons/INV_Letter_11:32:32:-14|t Mail", GOSSIP_SENDER_MAIN, 9);
+        AddGossipItemFor(player, 10, "|TInterface/Icons/INV_Letter_11:18:18:-12|t Mail", GOSSIP_SENDER_MAIN, 9);
     // Learn Dualspec
     if (ServiceEnabled(10))
-        AddGossipItemFor(player, 10, "|TInterface/Icons/achievement_general:32:32:-14|t Learn Dual Talents", GOSSIP_SENDER_MAIN, 10);
+        AddGossipItemFor(player, 10, "|TInterface/Icons/achievement_general:18:18:-12|t Learn Dual Talents", GOSSIP_SENDER_MAIN, 10);
     // One communal Fish Feast per temporary Steward; normal feast duration applies.
     if (ServiceEnabled(11))
-        AddGossipItemFor(player, 10, "|TInterface/Icons/INV_Misc_Fish_51:32:32:-14|t Prepare Fish Feast", GOSSIP_SENDER_MAIN, 11);
+        AddGossipItemFor(player, 10, "|TInterface/Icons/INV_Misc_Fish_51:18:18:-12|t Prepare Fish Feast", GOSSIP_SENDER_MAIN, 11);
     // Select which of the three Flask of the North buffs to receive.
     if (ServiceEnabled(12))
-        AddGossipItemFor(player, 10, "|TInterface/Icons/INV_Alchemy_Elixir_Empty:32:32:-14|t Apply Flask of the North", GOSSIP_SENDER_MAIN, 12);
+        AddGossipItemFor(player, 10, "|TInterface/Icons/INV_Alchemy_Elixir_Empty:18:18:-12|t Apply Flask of the North", GOSSIP_SENDER_MAIN, 12);
 
     SendGossipMenuFor(player, 1, creature->GetGUID());
     return true;
